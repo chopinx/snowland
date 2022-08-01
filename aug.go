@@ -48,18 +48,25 @@ func minAreaRect(points [][]int) int {
 	pool := NewPointsPool(points)
 	minArea := 0
 	for y, xCoords := range pool.XAxisMap {
+		// iterate through all points by y-axis, get a set of points for each y value
 		if len(xCoords) < 2 {
+			// if the points with same y are less than 2, there is no chance to get a rectangle
 			continue
 		}
 		for i := range xCoords {
 			x := xCoords[i]
 			for j := i + 1; j < len(xCoords); j++ {
+				// iterate through all other points with the same y coordinate as current point
 				xRight := xCoords[j]
 				xLen := xRight - x
 				yCoordsInX := pool.GetYAxisPoints(x)
 				for k := range yCoordsInX {
+					// iterate through all other points with the same x coordinate as current point
 					yDown := yCoordsInX[k]
 					if yDown >= y || !pool.Check(xRight, yDown) {
+						// if you get three the vertices of a rectangle,
+						// then you can calculate the coordinates of the last vertex
+						// so check if it exists
 						continue
 					}
 					yLen := y - yDown
@@ -88,6 +95,7 @@ func NewPointsPool(points [][]int) *PointsPool {
 	return pool
 }
 
+// Init points pool with a list of points
 func (p *PointsPool) Init(points [][]int) {
 	for i := range points {
 		x, y := xCoord(points[i][0]), yCoord(points[i][1])
@@ -115,6 +123,7 @@ func (p *PointsPool) Init(points [][]int) {
 	}
 }
 
+// Check if the specific point is inside the pool
 func (p *PointsPool) Check(x xCoord, y yCoord) bool {
 	if _, ok := p.pointSet[x]; !ok {
 		return false
@@ -125,6 +134,7 @@ func (p *PointsPool) Check(x xCoord, y yCoord) bool {
 	return true
 }
 
+// GetXAxisPoints func find all points which have the given y coordinate, and return their x coordinates
 func (p *PointsPool) GetXAxisPoints(y yCoord) []xCoord {
 	if _, ok := p.XAxisMap[y]; !ok {
 		return []xCoord{}
@@ -132,6 +142,7 @@ func (p *PointsPool) GetXAxisPoints(y yCoord) []xCoord {
 	return p.XAxisMap[y]
 }
 
+// GetYAxisPoints func find all points which have the given x coordinate, and return their y coordinates
 func (p *PointsPool) GetYAxisPoints(x xCoord) []yCoord {
 	if _, ok := p.YAxisMap[x]; !ok {
 		return []yCoord{}
