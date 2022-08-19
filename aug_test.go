@@ -58,8 +58,8 @@ func TestNewPointsPool(t *testing.T) {
 					1: {1: true, 0: true},
 					0: {0: true, 1: true},
 				},
-				XAxisMap: map[yCoord]xCoords{0: {0, 1}, 1: {0, 1}},
-				YAxisMap: map[xCoord]yCoords{0: {0, 1}, 1: {0, 1}},
+				XAxisMap: map[yCoord]XCoords{0: {0, 1}, 1: {0, 1}},
+				YAxisMap: map[xCoord]YCoords{0: {0, 1}, 1: {0, 1}},
 			},
 		},
 	}
@@ -76,8 +76,8 @@ func TestPointsPool_Check(t *testing.T) {
 	type fields struct {
 		points   [][]int
 		pointSet map[xCoord]map[yCoord]bool
-		xAxisMap map[yCoord]xCoords
-		yAxisMap map[xCoord]yCoords
+		xAxisMap map[yCoord]XCoords
+		yAxisMap map[xCoord]YCoords
 	}
 	type args struct {
 		x xCoord
@@ -89,8 +89,8 @@ func TestPointsPool_Check(t *testing.T) {
 			1: {1: true, 0: true},
 			0: {0: true, 1: true},
 		},
-		xAxisMap: map[yCoord]xCoords{0: {0, 1}, 1: {0, 1}},
-		yAxisMap: map[xCoord]yCoords{0: {0, 1}, 1: {0, 1}},
+		xAxisMap: map[yCoord]XCoords{0: {0, 1}, 1: {0, 1}},
+		yAxisMap: map[xCoord]YCoords{0: {0, 1}, 1: {0, 1}},
 	}
 	tests := []struct {
 		name   string
@@ -145,8 +145,8 @@ func TestPointsPool_GetXAxisPoints(t *testing.T) {
 	type fields struct {
 		points   [][]int
 		pointSet map[xCoord]map[yCoord]bool
-		xAxisMap map[yCoord]xCoords
-		yAxisMap map[xCoord]yCoords
+		xAxisMap map[yCoord]XCoords
+		yAxisMap map[xCoord]YCoords
 	}
 	type args struct {
 		y yCoord
@@ -157,14 +157,14 @@ func TestPointsPool_GetXAxisPoints(t *testing.T) {
 			1: {1: true, 0: true},
 			0: {0: true, 1: true},
 		},
-		xAxisMap: map[yCoord]xCoords{0: {0, 1}, 1: {0, 1}},
-		yAxisMap: map[xCoord]yCoords{0: {0, 1}, 1: {0, 1}},
+		xAxisMap: map[yCoord]XCoords{0: {0, 1}, 1: {0, 1}},
+		yAxisMap: map[xCoord]YCoords{0: {0, 1}, 1: {0, 1}},
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
-		want   xCoords
+		want   XCoords
 	}{
 		{
 			name:   "case1",
@@ -172,7 +172,7 @@ func TestPointsPool_GetXAxisPoints(t *testing.T) {
 			args: args{
 				y: 0,
 			},
-			want: xCoords{0, 1},
+			want: XCoords{0, 1},
 		},
 		{
 			name:   "case2",
@@ -180,7 +180,7 @@ func TestPointsPool_GetXAxisPoints(t *testing.T) {
 			args: args{
 				y: 1,
 			},
-			want: xCoords{0, 1},
+			want: XCoords{0, 1},
 		},
 		{
 			name:   "case3",
@@ -188,7 +188,7 @@ func TestPointsPool_GetXAxisPoints(t *testing.T) {
 			args: args{
 				y: 2,
 			},
-			want: xCoords{},
+			want: XCoords{},
 		},
 	}
 	for _, tt := range tests {
@@ -210,8 +210,8 @@ func TestPointsPool_GetYAxisPoints(t *testing.T) {
 	type fields struct {
 		points   [][]int
 		pointSet map[xCoord]map[yCoord]bool
-		xAxisMap map[yCoord]xCoords
-		yAxisMap map[xCoord]yCoords
+		xAxisMap map[yCoord]XCoords
+		yAxisMap map[xCoord]YCoords
 	}
 	type args struct {
 		x xCoord
@@ -222,14 +222,14 @@ func TestPointsPool_GetYAxisPoints(t *testing.T) {
 			1: {1: true, 0: true},
 			0: {0: true, 1: true},
 		},
-		xAxisMap: map[yCoord]xCoords{0: {0, 1}, 1: {1, 0}},
-		yAxisMap: map[xCoord]yCoords{0: {0, 1}, 1: {1, 0}},
+		xAxisMap: map[yCoord]XCoords{0: {0, 1}, 1: {1, 0}},
+		yAxisMap: map[xCoord]YCoords{0: {0, 1}, 1: {1, 0}},
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
-		want   yCoords
+		want   YCoords
 	}{
 		{
 			name:   "case1",
@@ -237,7 +237,7 @@ func TestPointsPool_GetYAxisPoints(t *testing.T) {
 			args: args{
 				x: 0,
 			},
-			want: yCoords{0, 1},
+			want: YCoords{0, 1},
 		},
 		{
 			name:   "case2",
@@ -245,7 +245,7 @@ func TestPointsPool_GetYAxisPoints(t *testing.T) {
 			args: args{
 				x: 1,
 			},
-			want: yCoords{1, 0},
+			want: YCoords{1, 0},
 		},
 		{
 			name:   "case3",
@@ -253,7 +253,7 @@ func TestPointsPool_GetYAxisPoints(t *testing.T) {
 			args: args{
 				x: 2,
 			},
-			want: yCoords{},
+			want: YCoords{},
 		},
 	}
 	for _, tt := range tests {
@@ -266,6 +266,139 @@ func TestPointsPool_GetYAxisPoints(t *testing.T) {
 			}
 			if got := p.GetYAxisPoints(tt.args.x); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetYAxisPoints() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_maxSlidingWindow(t *testing.T) {
+	type args struct {
+		nums []int
+		k    int
+	}
+	tests := []struct {
+		name string
+		args args
+		want []int
+	}{
+		{
+			name: "case1",
+			args: args{
+				nums: []int{1},
+				k:    1,
+			},
+			want: []int{1},
+		}, {
+			name: "case2",
+			args: args{
+				nums: []int{1, 3, -1, -3, 5, 3, 6, 7},
+				k:    3,
+			},
+			want: []int{3, 3, 5, 5, 6, 7},
+		}, {
+			name: "case3",
+			args: args{
+				nums: []int{1, 3, 1, 2, 0, 5},
+				k:    3,
+			},
+			want: []int{3, 3, 2, 5},
+		}, {
+			name: "case4",
+			args: args{
+				nums: []int{1, 2, 3, 4, 5, 6, 7, 8},
+				k:    3,
+			},
+			want: []int{3, 4, 5, 6, 7, 8},
+		}, {
+			name: "case5",
+			args: args{
+				nums: []int{1, -1},
+				k:    1,
+			},
+			want: []int{1, -1},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := maxSlidingWindow(tt.args.nums, tt.args.k); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("maxSlidingWindow() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_minimumDifference(t *testing.T) {
+	type args struct {
+		nums []int
+		k    int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "single",
+			args: args{
+				nums: []int{9},
+				k:    1,
+			},
+			want: 0,
+		},
+		{
+			name: "sample",
+			args: args{
+				nums: []int{1, 2, 4, 8},
+				k:    2,
+			},
+			want: 1,
+		},
+		{
+			name: "sample",
+			args: args{
+				nums: []int{1, 9, 4, 8},
+				k:    3,
+			},
+			want: 5,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := minimumDifference(tt.args.nums, tt.args.k); got != tt.want {
+				t.Errorf("minimumDifference() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_nextLargerNodes(t *testing.T) {
+	type args struct {
+		head *ListNode
+	}
+	tests := []struct {
+		name string
+		args args
+		want []int
+	}{
+		{
+			name: "sample",
+			args: args{
+				head: &ListNode{2, &ListNode{1, &ListNode{5, nil}}},
+			},
+			want: []int{5, 5, 0},
+		},
+		{
+			name: "sample1",
+			args: args{
+				head: &ListNode{2, &ListNode{7, &ListNode{4, &ListNode{3, &ListNode{5, &ListNode{9, nil}}}}}},
+			},
+			want: []int{7, 9, 5, 5, 9, 0},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := nextLargerNodes(tt.args.head); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("nextLargerNodes() = %v, want %v", got, tt.want)
 			}
 		})
 	}
