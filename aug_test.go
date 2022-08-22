@@ -403,3 +403,119 @@ func Test_nextLargerNodes(t *testing.T) {
 		})
 	}
 }
+
+func Test_count(t *testing.T) {
+	type args struct {
+		formula        string
+		flagList       []int
+		flagOffset     int
+		parenthesesMap map[int]int
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]int
+	}{
+		{
+			name: "sample",
+			args: args{
+				formula:        "H2O",
+				flagList:       []int{0, 1, 2, 3},
+				parenthesesMap: map[int]int{},
+			},
+			want: map[string]int{"H": 2, "O": 1},
+		},
+		{
+			name: "sample2",
+			args: args{
+				formula:        "H2O2",
+				flagList:       []int{0, 1, 2, 3, 4},
+				parenthesesMap: map[int]int{},
+			},
+			want: map[string]int{"H": 2, "O": 2},
+		},
+		{
+			name: "sample3",
+			args: args{
+				formula:        "Mg(OH)2",
+				flagList:       []int{0, 2, 3, 4, 5, 6, 7},
+				parenthesesMap: map[int]int{1: 4},
+			},
+			want: map[string]int{"H": 2, "O": 2, "Mg": 1},
+		},
+		{
+			name: "sample3",
+			args: args{
+				formula:        "Na5(OH)2(CO3)2",
+				flagList:       []int{0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14},
+				parenthesesMap: map[int]int{2: 5, 7: 11},
+			},
+			want: map[string]int{"H": 2, "O": 8, "Na": 5, "C": 2},
+		},
+		{
+			name: "sample3",
+			args: args{
+				formula:        "Na5(C(OH)2)2",
+				flagList:       []int{0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
+				parenthesesMap: map[int]int{2: 9, 4: 7},
+			},
+			want: map[string]int{"H": 4, "O": 4, "Na": 5, "C": 2},
+		},
+		{
+			name: "sample3",
+			args: args{
+				formula:        "Na5(S(C(OH)2)2)2",
+				flagList:       []int{0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+				parenthesesMap: map[int]int{2: 13, 4: 11, 6: 9},
+			},
+			want: map[string]int{"H": 8, "O": 8, "Na": 5, "C": 4, "S": 2},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := count(tt.args.formula, tt.args.flagList, tt.args.flagOffset, tt.args.parenthesesMap); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("count() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_countOfAtoms(t *testing.T) {
+	type args struct {
+		formula string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "sample",
+			args: args{
+				formula: "H2O",
+			},
+			want: "H2O",
+		},
+		{
+			name: "sample2",
+			args: args{
+				formula: "Mg(H2O)N",
+			},
+			want: "H2MgNO",
+		},
+		{
+			name: "sample2",
+			args: args{
+				formula: "Na5(S(C(OH)2)2)2",
+			},
+			want: "C4H8Na5O8S2",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := countOfAtoms(tt.args.formula); got != tt.want {
+				t.Errorf("countOfAtoms() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

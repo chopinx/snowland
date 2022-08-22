@@ -1,8 +1,11 @@
 package snowland
 
 import (
+	"fmt"
 	"math"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 // Problem No.939 Minimum Area Rectangle
@@ -276,4 +279,89 @@ func nextLargerNodes(head *ListNode) []int {
 		node = node.Next
 	}
 	return result
+}
+
+// Problem No.726 Number of Atoms
+//
+func countOfAtoms(formula string) string {
+	var flagList []int
+	stack := make([]int, 0)
+	parenthesesMap := make(map[int]int)
+	for i := 0; i < len(formula); i++ {
+		if formula[i] >= 'A' && formula[i] <= 'Z' {
+			flagList = append(flagList, i)
+		}
+		if formula[i] == '(' {
+			flagList = append(flagList, i)
+			stack = append(stack, len(flagList)-1)
+		}
+		if formula[i] == ')' {
+			flagList = append(flagList, i)
+			parenthesesMap[stack[len(stack)-1]] = len(flagList) - 1
+			stack = stack[:len(stack)-1]
+		}
+		if formula[i] >= '0' && formula[i] <= '9' && (formula[i-1] < '0' || formula[i-1] > '9') {
+			flagList = append(flagList, i)
+		}
+	}
+	flagList = append(flagList, len(formula))
+	countMap := count(formula, flagList, 0, parenthesesMap)
+	var atomList []string
+	for k := range countMap {
+		atomList = append(atomList, k)
+	}
+	sort.Strings(atomList)
+	var result strings.Builder
+	for i := range atomList {
+		_, _ = fmt.Fprint(&result, atomList[i])
+		if countMap[atomList[i]] > 1 {
+			_, _ = fmt.Fprint(&result, strconv.Itoa(countMap[atomList[i]]))
+		}
+	}
+	return result.String()
+}
+
+func count(formula string, flagList []int, flagOffset int, parenthesesMap map[int]int) map[string]int {
+	countMap := make(map[string]int)
+	for i := 0; i < len(flagList)-1 && flagList[i] < len(formula); i++ {
+		key := formula[flagList[i]:flagList[i+1]]
+		nextKey := ""
+		if i+1 < len(flagList)-1 {
+			nextKey = formula[flagList[i+1]:flagList[i+2]]
+		}
+		if key[0] >= 'A' && key[0] <= 'Z' {
+			if _, ok := countMap[key]; ok {
+				countMap[key] += 1
+			} else {
+				countMap[key] = 1
+			}
+			if len(nextKey) > 0 && nextKey[0] >= '0' && nextKey[0] <= '9' {
+				times, _ := strconv.Atoi(nextKey)
+				countMap[key] += times - 1
+				i++
+			}
+		} else if key[0] == '(' {
+			rightParenthesesFlagIndex := parenthesesMap[i+flagOffset] - flagOffset
+			subMap := count(formula, flagList[i+1:rightParenthesesFlagIndex+2], flagOffset+i+1, parenthesesMap)
+			nextIndex := flagList[rightParenthesesFlagIndex] + 1
+			i = rightParenthesesFlagIndex
+			if nextIndex < len(formula) && formula[nextIndex] >= '0' && formula[nextIndex] <= '9' {
+				nextKey = formula[flagList[rightParenthesesFlagIndex]+1 : flagList[rightParenthesesFlagIndex+2]]
+				times, _ := strconv.Atoi(nextKey)
+				for k := range subMap {
+					subMap[k] *= times
+				}
+				i++
+			}
+			for k, subV := range subMap {
+				if _, ok := countMap[k]; ok {
+					countMap[k] += subV
+				} else {
+					countMap[k] = subV
+				}
+			}
+
+		}
+	}
+	return countMap
 }
