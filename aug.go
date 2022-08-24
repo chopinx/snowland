@@ -365,3 +365,92 @@ func count(formula string, flagList []int, flagOffset int, parenthesesMap map[in
 	}
 	return countMap
 }
+
+// Problem No.1615 Maximal Network Rank
+//
+// There is an infrastructure of n cities with some number of roads connecting these cities.
+// Each roads[i] = [ai, bi] indicates that there is a bidirectional road between cities ai and bi.
+//
+// The network rank of two different cities is defined as the total number of directly connected roads to either city.
+// If a road is directly connected to both cities, it is only counted once.
+//
+// The maximal network rank of the infrastructure is the maximum network rank of all pairs of different cities.
+//
+// Given the integer n and the array roads, return the maximal network rank of the entire infrastructure.
+//
+// The degree of a city is the number of roads connected to it.
+// For any pair of different cities, such as a and b, the degree of them are Da and Db,
+// the rank of the pair must be neither Da+Db nor Da+Db, which depends on if there is a bidirectional road between them.
+// So we can sort cities by their degree in descending order. Then we can get the top 2 cities with the highest degree.
+// Assume the sum of the degree of the top 2 cities is D,
+// the maximal network rank of the entire infrastructure is neither D nor D-1,
+// depends on if there is a bidirectional road between the top 2 cities.
+// There are maybe more than one pairs of cities, whose sum of degree equals to D,
+// we have to check each of them to find out if there is any pair with no bidirectional road.
+// If it's yes, then the answer is D, otherwise it's D-1
+func maximalNetworkRank(n int, roads [][]int) int {
+	degrees := make([]int, n)
+	roadMap := make(map[int]map[int]bool)
+	maxDegreeList := make([]int, 0)
+	maxDegree, secondDegree := 0, 0
+	secondDegreeList := make([]int, 0)
+	for i := 0; i < len(roads); i++ {
+		degrees[roads[i][0]]++
+		degrees[roads[i][1]]++
+		smaller, bigger := roads[i][0], roads[i][1]
+		if smaller > bigger {
+			smaller, bigger = bigger, smaller
+		}
+		if _, ok := roadMap[smaller]; !ok {
+			roadMap[smaller] = make(map[int]bool)
+		}
+		roadMap[smaller][bigger] = true
+	}
+	for i := 0; i < len(degrees); i++ {
+		currDegree := degrees[i]
+		if currDegree > maxDegree {
+			secondDegree = maxDegree
+			maxDegree = currDegree
+			secondDegreeList = maxDegreeList
+			maxDegreeList = []int{i}
+		} else if currDegree == maxDegree {
+			maxDegreeList = append(maxDegreeList, i)
+		} else if currDegree > secondDegree {
+			secondDegree = currDegree
+			secondDegreeList = []int{i}
+		} else if currDegree == secondDegree {
+			secondDegreeList = append(secondDegreeList, i)
+		}
+	}
+	if len(maxDegreeList) > 1 {
+		for i := 0; i < len(maxDegreeList); i++ {
+			for j := i + 1; j < len(maxDegreeList); j++ {
+				smaller, bigger := maxDegreeList[i], maxDegreeList[j]
+				if smaller > bigger {
+					smaller, bigger = bigger, smaller
+				}
+				if _, ok := roadMap[smaller]; !ok {
+					return maxDegree * 2
+				}
+				if _, ok := roadMap[smaller][bigger]; !ok {
+					return maxDegree * 2
+				}
+			}
+		}
+		return maxDegree*2 - 1
+	} else {
+		for i := 0; i < len(secondDegreeList); i++ {
+			smaller, bigger := maxDegreeList[0], secondDegreeList[i]
+			if smaller > bigger {
+				smaller, bigger = bigger, smaller
+			}
+			if _, ok := roadMap[smaller]; !ok {
+				return maxDegree + secondDegree
+			}
+			if _, ok := roadMap[smaller][bigger]; !ok {
+				return maxDegree + secondDegree
+			}
+		}
+		return maxDegree + secondDegree - 1
+	}
+}
