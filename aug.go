@@ -454,3 +454,155 @@ func maximalNetworkRank(n int, roads [][]int) int {
 		return maxDegree + secondDegree - 1
 	}
 }
+
+// Problem No.378 Kth Smallest Element in a Sorted Matrix
+//
+// Given an n x n matrix where each of the rows and columns is sorted in ascending order, return the kth smallest element in the matrix.
+// Note that it is the kth smallest element in the sorted order, not the kth distinct element.
+// You must find a solution with a memory complexity better than O(n2).
+//
+// Example 1:
+//	Input: matrix = [[1,5,9],[10,11,13],[12,13,15]], k = 8
+// 	Output: 13
+// 	Explanation: The elements in the matrix are [1,5,9,10,11,12,13,13,15], and the 8th smallest number is 13
+//
+// Example 2:
+// Input: matrix = [[-5]], k = 1
+// Output: -5
+//
+// Constraints:
+// 	n == matrix.length == matrix[i].length
+// 	1 <= n <= 300
+// 	-10^9 <= matrix[i][j] <= 10^9
+// 	All the rows and columns of matrix are guaranteed to be sorted in non-decreasing order.
+// 	1 <= k <= n2
+func kthSmallest(matrix [][]int, k int) int {
+	var h Heap
+	n := len(matrix)
+	if k <= n*n/2 {
+		minHeap := &MinHeap{
+			BaseHeap{
+				Matrix:    matrix,
+				IndexList: []int{0},
+				N:         n,
+			},
+		}
+		minHeap.Heap = minHeap
+		h = minHeap
+	} else {
+		maxHeap := &MaxHeap{
+			BaseHeap{
+				Matrix:    matrix,
+				IndexList: []int{0},
+				N:         n,
+			},
+		}
+		maxHeap.Heap = maxHeap
+		h = maxHeap
+		k = n*n + 1 - k
+	}
+	size := 0
+	visitedMap := map[int]bool{0: true}
+	for true {
+		index, value := h.Pop()
+		size++
+		if size == k {
+			return value
+		}
+		tryPush(visitedMap, index+1, h)
+		tryPush(visitedMap, index+n, h)
+		tryPush(visitedMap, index+n+1, h)
+	}
+	return 0
+}
+
+func tryPush(visitedMap map[int]bool, index int, h Heap) {
+	if index < h.GetN()*h.GetN() && !isVisited(visitedMap, index) {
+		h.Push(index)
+		visitedMap[index] = true
+	}
+}
+
+func isVisited(visitedMap map[int]bool, index int) bool {
+	_, ok := visitedMap[index]
+	return ok
+}
+
+type Heap interface {
+	Len() int
+	Less(i, j int) bool
+	Swap(i, j int)
+	Push(int)
+	Pop() (index int, value int)
+	GetValue(int) int
+	GetN() int
+}
+
+type BaseHeap struct {
+	Heap
+	Matrix    [][]int
+	IndexList []int
+	N         int
+}
+
+func (h BaseHeap) GetN() int {
+	return h.N
+}
+
+type MaxHeap struct {
+	BaseHeap
+}
+
+type MinHeap struct {
+	BaseHeap
+}
+
+func (h MaxHeap) GetValue(index int) int {
+	return h.Matrix[h.GetN()-1-index/h.GetN()][h.GetN()-1-index%h.GetN()]
+}
+
+func (h MinHeap) GetValue(index int) int {
+	return h.Matrix[index/h.GetN()][index%h.GetN()]
+}
+
+func (h MaxHeap) Less(i, j int) bool {
+	return h.GetValue(h.IndexList[i]) > h.GetValue(h.IndexList[j])
+}
+
+func (h BaseHeap) Len() int { return len(h.IndexList) }
+func (h MinHeap) Less(i, j int) bool {
+	return h.GetValue(h.IndexList[i]) < h.GetValue(h.IndexList[j])
+}
+func (h BaseHeap) Swap(i, j int) { h.IndexList[i], h.IndexList[j] = h.IndexList[j], h.IndexList[i] }
+
+func (h *BaseHeap) Push(x int) {
+	// Push and Pop use pointer receivers because they modify the slice's length,
+	// not just its contents.
+	h.IndexList = append(h.IndexList, x)
+	currIndex := len(h.IndexList) - 1
+	for currIndex > 0 && h.Heap.Less(currIndex, (currIndex-1)/2) {
+		h.Heap.Swap(currIndex, (currIndex-1)/2)
+		currIndex = (currIndex - 1) / 2
+	}
+}
+
+func (h *BaseHeap) Pop() (index int, value int) {
+	old := h.IndexList
+	n := len(old)
+	index, value = old[0], h.Heap.GetValue(old[0])
+	old[0] = old[n-1]
+	h.IndexList = old[0 : n-1]
+	for i := 0; i < len(h.IndexList); {
+		left := i*2 + 1
+		smaller := i*2 + 2
+		if smaller >= len(h.IndexList) || h.Heap.Less(left, smaller) {
+			smaller = left
+		}
+		if smaller >= len(h.IndexList) || !h.Heap.Less(smaller, i) {
+			break
+		}
+		h.Heap.Swap(i, smaller)
+		i = smaller
+	}
+	return index, value
+}
