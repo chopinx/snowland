@@ -645,3 +645,98 @@ func Test_divideArray(t *testing.T) {
 		})
 	}
 }
+
+func Test_decodeAtIndex(t *testing.T) {
+	type args struct {
+		s string
+		k int
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "sample",
+			args: args{
+				s: "abc",
+				k: 1,
+			},
+			want: "a",
+		},
+		{
+			name: "sample",
+			args: args{
+				s: "a23",
+				k: 6,
+			},
+			want: "a",
+		},
+		{
+			name: "sample",
+			args: args{
+				s: "leet2code34",
+				k: 30,
+			},
+			want: "e",
+		},
+		{
+			name: "sample",
+			args: args{
+				s: "leet2code34",
+				k: 37,
+			},
+			want: "l",
+		},
+		{
+			name: "singleLetter",
+			args: args{
+				s: "a32543532",
+				k: 100,
+			},
+			want: "a",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := decodeAtIndex(tt.args.s, tt.args.k); got != tt.want {
+				t.Errorf("decodeAtIndex() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_isPrefixOfWord(t *testing.T) {
+	type args struct {
+		sentence   string
+		searchWord string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "sample",
+			args: args{sentence: "i love you", searchWord: "you"},
+			want: 3,
+		},
+		{
+			name: "sample",
+			args: args{sentence: "i love you", searchWord: "your"},
+			want: -1,
+		},
+		{
+			name: "sample",
+			args: args{sentence: "i love you and your family", searchWord: "you"},
+			want: 3,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isPrefixOfWord(tt.args.sentence, tt.args.searchWord); got != tt.want {
+				t.Errorf("isPrefixOfWord() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

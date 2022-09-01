@@ -647,3 +647,154 @@ func divideArray(nums []int) bool {
 	}
 	return true
 }
+
+// Problem No.880 Decoded String at Index
+//
+// You are given an encoded string s. To decode the string to a tape,
+// the encoded string is read one character at a time and the following steps are taken:
+// 		If the character read is a letter, that letter is written onto the tape.
+// 		If the character read is a digit d, the entire current tape is repeatedly written d - 1 more times in total.
+// 		Given an integer k, return the kth letter (1-indexed) in the decoded string.
+//
+// Example 1:
+// 		Input: s = "leet2code3", k = 10
+// 		Output: "o"
+// 		Explanation: The decoded string is "leetleetcodeleetleetcodeleetleetcode".
+// 		The 10th letter in the string is "o".
+// Example 2:
+// 		Input: s = "ha22", k = 5
+// 		Output: "h"
+// 		Explanation: The decoded string is "hahahaha".
+// 		The 5th letter is "h".
+// Example 3:
+// 		Input: s = "a2345678999999999999999", k = 1
+// 		Output: "a"
+// 		Explanation: The decoded string is "a" repeated 8301530446056247680 times.
+// 		The 1st letter is "a".
+//
+// Constraints:
+// 		2 <= s.length <= 100
+// 		s consists of lowercase English letters and digits 2 through 9.
+// 		s starts with a letter.
+// 		1 <= k <= 10^9
+// 		It is guaranteed that k is less than or equal to the length of the decoded string.
+// 		The decoded string is guaranteed to have less than 263 letters.
+//
+// Solution:
+// We can cut the input string into a series of blocks. A letter followed by a digit is a block,
+// it's needed to be said that the letter can be a blank string.
+// For example, we can cut the "a123" to [("a", 1), ("", 2), ("", 3)].
+// for each block, we can get the length of its prefix with the following formula
+// 		Ln = (Ln-1 + l) * Times
+// The Ln is the length of the nth block's prefix, the l is the length of the letter of it,
+// and the times is the digit in that block.
+// First, we should find the block, whose length of the prefix plus the length of its letter is not less than k.
+// Then, there are two cases.
+// 		case1: the length of the block's prefix is less than k, we can get the (k-len(prefix))th letter which is the answer.
+// 		case2: the length of the block's prefix is not less than k.
+// Then the answer is in the prefix which is m times repeated of the previous block.
+// Assume the prefix is m times repeated of str1, then the answer is the kth letter of str1,
+// in which k'=k%len(str1). We can use binary searching to find the block with the total length just not less than k.
+// After that, we can go through backward to find the right answer.
+func decodeAtIndex(s string, k int) string {
+	var elems []Elem
+	lastIndex := 0
+	prefixLen := 0
+	s = s + "1"
+	for i := range s {
+		if s[i] >= '1' && s[i] <= '9' {
+			times := int(s[i] - '0')
+			elems = append(elems, Elem{Letter: s[lastIndex:i], PrefixLen: prefixLen, Times: times})
+			prefixLen = (prefixLen + (i - lastIndex)) * times
+			lastIndex = i + 1
+		}
+	}
+	minGreaterIndex := findIndex(elems, 0, len(elems)-1, k)
+	for i := minGreaterIndex; i >= 0; i-- {
+		currElem := elems[i]
+		if k > currElem.PrefixLen {
+			return string(currElem.Letter[k-currElem.PrefixLen-1])
+		}
+		preElem := elems[i-1]
+		k = k % (preElem.PrefixLen + len(preElem.Letter))
+		if k == 0 {
+			k = preElem.PrefixLen + len(preElem.Letter)
+		}
+	}
+	return ""
+}
+
+type Elem struct {
+	Letter    string
+	PrefixLen int
+	Times     int
+}
+
+func findIndex(elems []Elem, start int, end int, k int) int {
+	if start >= end {
+		return start
+	}
+	midIndex := (start + end) / 2
+	if getLen(elems[midIndex]) == k {
+		return midIndex
+	} else if getLen(elems[midIndex]) > k {
+		return findIndex(elems, start, midIndex, k)
+	} else {
+		return findIndex(elems, midIndex+1, end, k)
+	}
+}
+
+func getLen(elem Elem) int {
+	return elem.PrefixLen + len(elem.Letter)
+}
+
+// Problem No.1455 Check If a Word Occurs As a Prefix of Any Word in a Sentence
+//
+// Given a sentence that consists of some words separated by a single space, and a searchWord,
+// check if searchWord is a prefix of any word in sentence.
+// Return the index of the word in sentence (1-indexed) where searchWord is a prefix of this word.
+// If searchWord is a prefix of more than one word, return the index of the first word (minimum index).
+// If there is no such word return -1.
+// A prefix of a string s is any leading contiguous substring of s.
+//
+// Example 1:
+// 		Input: sentence = "i love eating burger", searchWord = "burg"
+// 		Output: 4
+// 		Explanation: "burg" is prefix of "burger" which is the 4th word in the sentence.
+//
+// Example 2:
+// 		Input: sentence = "this problem is an easy problem", searchWord = "pro"
+// 		Output: 2
+// 		Explanation: "pro" is prefix of "problem" which is the 2nd and the 6th word in the sentence, but we return 2 as it's the minimal index.
+//
+// Example 3:
+// 		Input: sentence = "i am tired", searchWord = "you"
+// 		Output: -1
+// 		Explanation: "you" is not a prefix of any word in the sentence.
+//
+// Constraints:
+// 		1 <= sentence.length <= 100
+// 		1 <= searchWord.length <= 10
+// 		sentence consists of lowercase English letters and spaces.
+// 		searchWord consists of lowercase English letters.
+func isPrefixOfWord(sentence string, searchWord string) int {
+	offset := 0
+	wordIndex := 1
+	for i := range sentence {
+		if sentence[i] == ' ' {
+			offset = 0
+			wordIndex++
+			continue
+		}
+		if offset < len(searchWord) && offset >= 0 && sentence[i] == searchWord[offset] {
+
+			offset++
+			if offset >= len(searchWord) {
+				return wordIndex
+			}
+		} else {
+			offset = -1
+		}
+	}
+	return -1
+}
