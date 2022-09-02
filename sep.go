@@ -52,3 +52,68 @@ func minTimeToVisitAllPoints(points [][]int) int {
 	}
 	return time
 }
+
+// Problem No.1925 Count Square Sum Triples
+//
+// A square triple (a,b,c) is a triple where a, b, and c are integers and a^2 + b^2 = c^2.
+// Given an integer n, return the number of square triples such that 1 <= a, b, c <= n.
+//
+// Example 1:
+// 		Input: n = 5
+// 		Output: 2
+// 		Explanation: The square triples are (3,4,5) and (4,3,5).
+//
+// Example 2:
+// 		Input: n = 10
+// 		Output: 4
+// 		Explanation: The square triples are (3,4,5), (4,3,5), (6,8,10), and (8,6,10).
+//
+// Constraints:
+// 		1 <= n <= 250
+func countTriples(n int) int {
+	hashLen := 4 * n
+	squares := make([][]int, hashLen)
+	for i := 1; i <= n; i++ {
+		square := i * i
+		hash := square % hashLen
+		if squares[hash] == nil {
+			squares[hash] = []int{square}
+		} else {
+			squares[hash] = append(squares[hash], square)
+		}
+	}
+	count := 0
+	maxSquare := n * n
+	for a := 1; a <= n; a++ {
+		for b := a; b <= n; b++ {
+			squareSum := a*a + b*b
+			if squareSum > maxSquare {
+				break
+			}
+			hash := squareSum % hashLen
+			if squares[hash] != nil {
+				if fastFind(squares[hash], 0, len(squares[hash])-1, squareSum) {
+					count += 2
+					if a == b {
+						count--
+					}
+				}
+			}
+		}
+	}
+	return count
+}
+
+func fastFind(nums []int, start int, end int, target int) bool {
+	if end <= start {
+		return nums[start] == target
+	}
+	mid := (start + end) / 2
+	if nums[mid] == target {
+		return true
+	} else if nums[mid] > target {
+		return fastFind(nums, start, mid-1, target)
+	} else {
+		return fastFind(nums, mid+1, end, target)
+	}
+}
