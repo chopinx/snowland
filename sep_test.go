@@ -49,3 +49,50 @@ func Test_countTriples(t *testing.T) {
 		})
 	}
 }
+
+func Test_minimumRemoval(t *testing.T) {
+	type args struct {
+		beans []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int64
+	}{
+		{
+			name: "sample",
+			args: args{
+				beans: []int{4, 1, 5, 6},
+			},
+			want: 4,
+		},
+		{
+			name: "sample",
+			args: args{
+				beans: []int{2, 10, 3, 2},
+			},
+			want: 7,
+		},
+		{
+			name: "sample",
+			args: args{
+				beans: []int{60, 60},
+			},
+			want: 0,
+		},
+		{
+			name: "sample",
+			args: args{
+				beans: []int{43, 44, 45, 46, 47},
+			},
+			want: 10,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := minimumRemoval(tt.args.beans); got != tt.want {
+				t.Errorf("minimumRemoval() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
