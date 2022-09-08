@@ -2,7 +2,6 @@ package snowland
 
 import (
 	"fmt"
-	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -156,55 +155,41 @@ func (p *PointsPool) GetYAxisPoints(x xCoord) YCoords {
 }
 
 // Problem No.239 Sliding Window Maximum
-
 func maxSlidingWindow(nums []int, k int) []int {
-	return TmpTableMaxSlidingWindow{}.maxSlidingWindow(nums, k)
-}
-
-type MaxSlidingWindow interface {
-	maxSlidingWindow([]int, int) []int
-}
-
-type TmpTableMaxSlidingWindow struct {
-}
-
-func (TmpTableMaxSlidingWindow) maxSlidingWindow(nums []int, k int) []int {
-	// fmt.Println(nums)
-	maxList := make([]int, len(nums))
-	maxList[0] = nums[0]
-	tmpTable := make([]int, len(nums))
-	tmpTable[0] = nums[0]
-	for i := 1; i < len(nums); i++ {
-		tmpTable[i] = math.MinInt
-	}
-	for i := 1; i < len(nums); i++ {
-		n := nums[i]
-		if (i >= k && n > tmpTable[i-k+1]) || (i < k && n > tmpTable[0]) {
-			maxList[i] = n
-		} else if i >= k {
-			maxList[i] = tmpTable[i-k+1]
+	maxSize := len(nums) + 1
+	queue := make([]int, maxSize)
+	start, end := maxSize, maxSize
+	result := make([]int, 0)
+	for i := 0; i < len(nums); i++ {
+		if end-start <= 0 || nums[i] >= nums[queue[(end-1)%maxSize]] {
+			end++
+			queue[(end-1)%maxSize] = i
 		} else {
-			maxList[i] = tmpTable[0]
+			start = fastFindInCQ(nums, queue, start, end, nums[i]) - 1
+			queue[start%maxSize] = i
 		}
-		for j := 0; i-j >= 0 && j < k; j++ {
-			if tmpTable[i-j] < n {
-				tmpTable[i-j] = n
-			} else {
-				break
+		if i >= k-1 {
+			j := end - 1
+			for queue[j%maxSize] <= i-k {
+				j--
 			}
+			end = j + 1
+			result = append(result, nums[queue[(end-1)%maxSize]])
 		}
-		// fmt.Printf("i=%d, tmp: %v\t", i, tmpTable)
-		// fmt.Printf("max: %v\n", maxList)
 	}
-	return maxList[k-1:]
+	return result
 }
 
-type HeapMaxSlidingWindow struct {
-}
-
-func (m HeapMaxSlidingWindow) maxSlidingWindow(nums []int, k int) []int {
-	// TODO implement the algorithm with a red-black tree
-	return nil
+func fastFindInCQ(nums []int, queue []int, start int, end int, target int) int {
+	if nums[queue[start%len(queue)]] > target {
+		return start
+	}
+	mid := (start + end - 1) / 2
+	if nums[queue[mid%len(queue)]] <= target {
+		return fastFindInCQ(nums, queue, mid+1, end, target)
+	} else {
+		return fastFindInCQ(nums, queue, start, mid+1, target)
+	}
 }
 
 // Problem No.1984 Minimum Difference Between Highest and Lowest of K Scores.

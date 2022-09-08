@@ -316,6 +316,13 @@ func Test_maxSlidingWindow(t *testing.T) {
 				k:    1,
 			},
 			want: []int{1, -1},
+		}, {
+			name: "case6",
+			args: args{
+				nums: []int{7, 2, 4},
+				k:    2,
+			},
+			want: []int{7, 4},
 		},
 	}
 	for _, tt := range tests {
