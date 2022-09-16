@@ -1,6 +1,10 @@
 package snowland
 
-import "sort"
+import (
+	"fmt"
+	"math/rand"
+	"sort"
+)
 
 // Problem No.1266 Minimum Time Visiting All Points
 //
@@ -179,4 +183,204 @@ func minimumRemoval(beans []int) int64 {
 		}
 	}
 	return minRemove
+}
+
+// hackerrank Problem
+func minGreaterArr(arr []int32) []int32 {
+	fastSort(arr, 0, len(arr)-1)
+	sum, sumA := 0, 0
+	for i := 0; i < len(arr); i++ {
+		sum += int(arr[i])
+	}
+	for i := len(arr) - 1; i >= 0; i-- {
+		sumA += int(arr[i])
+		if sumA*2 > sum {
+			return arr[i:]
+		}
+	}
+	return arr
+}
+
+func fastSort(arr []int32, start int, end int) {
+	if start >= end {
+		return
+	}
+	index := rand.Int()%(end-start+1) + start
+	low, high := start+1, end
+	arr[start], arr[index] = arr[index], arr[start]
+	for low <= high {
+		if arr[low] < arr[start] {
+			low++
+		} else {
+			arr[low], arr[high] = arr[high], arr[low]
+			high--
+		}
+	}
+	fastSort(arr, start, high)
+	fastSort(arr, low, end)
+}
+
+// Problem No.96 Unique Binary Search Trees
+//
+// Given an integer n, return the number of structurally unique BST's (binary search trees) which has exactly n nodes of unique values from 1 to n.
+//
+// Example 1:
+// 		Input: n = 3
+// 		Output: 5
+//
+// Example 2:
+// 		Input: n = 1
+// 		Output: 1
+//
+// Constraints:
+// 		1 <= n <= 19
+//
+// Solving Time Cost: 20 minutes
+func numTrees(n int) int {
+	if n <= 1 {
+		return 1
+	}
+	ans := make([]int, n+1)
+	ans[0], ans[1] = 1, 1
+	for i := 2; i <= n; i++ {
+		for j := 0; j < i/2; j++ {
+			ans[i] += ans[j] * ans[i-1-j]
+		}
+		ans[i] *= 2
+		if i%2 == 1 {
+			ans[i] += ans[i/2] * ans[i/2]
+		}
+		// fmt.Printf("n=%d, ans=%d\n", i, ans[i])
+	}
+	return ans[n]
+}
+
+// Problem No.452 Minimum Number of Arrows to Burst Balloons
+//
+// There are some spherical balloons taped onto a flat wall that represents the XY-plane.
+// The balloons are represented as a 2D integer array points where points[i] = [xstart, xend] denotes a balloon
+// whose horizontal diameter stretches between xstart and xend. You do not know the exact y-coordinates of the balloons.
+// Arrows can be shot up directly vertically (in the positive y-direction) from different points along the x-axis.
+// A balloon with xstart and xend is burst by an arrow shot at x if xstart <= x <= xend. There is no limit to the number of arrows that can be shot. A shot arrow keeps traveling up infinitely, bursting any balloons in its path.
+//
+// Given the array points, return the minimum number of arrows that must be shot to burst all balloons.
+//
+// Example 1:
+// 		Input: points = [[10,16],[2,8],[1,6],[7,12]]
+// 		Output: 2
+// 		Explanation: The balloons can be burst by 2 arrows:
+// 		- Shoot an arrow at x = 6, bursting the balloons [2,8] and [1,6].
+// 		- Shoot an arrow at x = 11, bursting the balloons [10,16] and [7,12].
+//
+// Example 2:
+// 		Input: points = [[1,2],[3,4],[5,6],[7,8]]
+// 		Output: 4
+// 		Explanation: One arrow needs to be shot for each balloon for a total of 4 arrows.
+//
+// Example 3:
+// 		Input: points = [[1,2],[2,3],[3,4],[4,5]]
+// 		Output: 2
+// 		Explanation: The balloons can be burst by 2 arrows:
+// 			- Shoot an arrow at x = 2, bursting the balloons [1,2] and [2,3].
+// 			- Shoot an arrow at x = 4, bursting the balloons [3,4] and [4,5].
+//
+// Constraints:
+// 		1 <= points.length <= 10^5
+// 		points[i].length == 2
+// 		-2^31 <= xstart < xend <= 2^31 - 1
+func findMinArrowShots(points [][]int) int {
+	return findMinArrowShots1(points)
+}
+
+func findMinArrowShots1(points [][]int) int {
+	left := LeftList{
+		Points: points,
+		Indexs: make([]int, len(points)),
+	}
+	for i := 0; i < len(left.Indexs); i++ {
+		left.Indexs[i] = i
+	}
+	sort.Sort(left)
+	rightList := []int{points[left.Indexs[0]][1]}
+	for i := 1; i < len(points); i++ {
+		if points[left.Indexs[i]][0] > rightList[len(rightList)-1] {
+			rightList = append(rightList, points[left.Indexs[i]][1])
+		} else if rightList[len(rightList)-1] > points[left.Indexs[i]][1] {
+			rightList[len(rightList)-1] = points[left.Indexs[i]][1]
+		}
+	}
+	return len(rightList)
+}
+
+type LeftList struct {
+	Points [][]int
+	Indexs []int
+}
+
+func (l LeftList) Len() int {
+	return len(l.Points)
+}
+
+func (l LeftList) Less(i, j int) bool {
+	return l.Points[l.Indexs[i]][0] < l.Points[l.Indexs[j]][0]
+}
+
+func (l LeftList) Swap(i, j int) {
+	l.Indexs[i], l.Indexs[j] = l.Indexs[j], l.Indexs[i]
+}
+
+type RightList struct {
+	Points [][]int
+	Indexs []int
+}
+
+func (l RightList) Len() int {
+	return len(l.Points)
+}
+
+func (l RightList) Less(i, j int) bool {
+	return l.Points[l.Indexs[i]][1] < l.Points[l.Indexs[j]][1]
+}
+
+func (l RightList) Swap(i, j int) {
+	l.Indexs[i], l.Indexs[j] = l.Indexs[j], l.Indexs[i]
+}
+
+func findMinArrowShots2(points [][]int) int {
+	right := RightList{
+		Points: points,
+		Indexs: make([]int, len(points)),
+	}
+	for i := 0; i < len(right.Indexs); i++ {
+		right.Indexs[i] = i
+	}
+	sort.Sort(right)
+	fmt.Printf("rightIndex: %v", right.Indexs)
+	left := LeftList{
+		Points: points,
+		Indexs: make([]int, len(points)),
+	}
+	for i := 0; i < len(left.Indexs); i++ {
+		left.Indexs[i] = i
+	}
+	sort.Sort(left)
+	fmt.Printf("leftIndex: %v", left.Indexs)
+	visited := make(map[int]int)
+	ans, j := 0, 0
+	for i := 0; i < len(right.Indexs); i++ {
+		cycleIndex := right.Indexs[i]
+		if _, ok := visited[cycleIndex]; ok {
+			continue
+		}
+		for j < len(points) && points[left.Indexs[j]][0] <= points[cycleIndex][1] {
+			visited[left.Indexs[j]] = 0
+			j++
+		}
+		fmt.Printf("visited: %v\n", visited)
+		ans++
+		if len(visited) == len(points) {
+			break
+		}
+	}
+	return ans
 }
