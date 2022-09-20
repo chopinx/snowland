@@ -210,3 +210,47 @@ func Test_findMinArrowShots(t *testing.T) {
 		})
 	}
 }
+
+func Test_orderOfLargestPlusSign(t *testing.T) {
+	type args struct {
+		n     int
+		mines [][]int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "sample",
+			args: args{
+				n:     1,
+				mines: [][]int{},
+			},
+			want: 1,
+		},
+		{
+			name: "sample",
+			args: args{
+				n:     3,
+				mines: [][]int{},
+			},
+			want: 2,
+		},
+		{
+			name: "sample",
+			args: args{
+				n:     5,
+				mines: [][]int{{2, 4}},
+			},
+			want: 2,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := orderOfLargestPlusSign(tt.args.n, tt.args.mines); got != tt.want {
+				t.Errorf("orderOfLargestPlusSign() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

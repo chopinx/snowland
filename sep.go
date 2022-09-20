@@ -37,7 +37,7 @@ import (
 //
 // Solution:
 // for any two points with integer coordinates a=(xa,ya) and b=(xb,yb), you can always move from a to b in n steps,
-// where n=max(abs(xa-xb),abs(ya-yb)). Because when you take a step, you're either descending the distance in x-axis,
+// where n=min(abs(xa-xb),abs(ya-yb)). Because when you take a step, you're either descending the distance in x-axis,
 // nor descending the distance in y-axis, nor descending both, and one unit one step in one second.
 func minTimeToVisitAllPoints(points [][]int) int {
 	time := 0
@@ -383,4 +383,101 @@ func findMinArrowShots2(points [][]int) int {
 		}
 	}
 	return ans
+}
+
+// 764. Largest Plus Sign
+//
+// You are given an integer n. You have an n x n binary grid grid
+// with all values initially 1's except for some indices given in the array mines.
+// The ith element of the array mines is defined as mines[i] = [xi, yi] where grid[xi][yi] == 0.
+// Return the order of the largest axis-aligned plus sign of 1's contained in grid. If there is none, return 0.
+// An axis-aligned plus sign of 1's of order k has some center grid[r][c] == 1 along with four arms of
+// length k - 1 going up, down, left, and right, and made of 1's.
+// Note that there could be 0's or 1's beyond the arms of the plus sign,
+// only the relevant area of the plus sign is checked for 1's.
+//
+// Example 1:
+// 		Input: n = 5, mines = [[4,2]]
+// 		Output: 2
+// 		Explanation: In the above grid, the largest plus sign can only be of order 2. One of them is shown.
+//
+// Example 2:
+// 		Input: n = 1, mines = [[0,0]]
+// 		Output: 0
+// 		Explanation: There is no plus sign, so return 0.
+//
+// Constraints:
+// 		1 <= n <= 500
+// 		1 <= mines.length <= 5000
+// 		0 <= xi, yi < n
+// 		All the pairs (xi, yi) are unique.
+func orderOfLargestPlusSign(n int, mines [][]int) int {
+	// transform the row to 1's block
+	rows := make([][]int, n)
+	cols := make([][]int, n)
+	for i := 0; i < n; i++ {
+		rows[i] = []int{-1, n}
+	}
+	for i := 0; i < n; i++ {
+		cols[i] = []int{-1, n}
+	}
+	for _, m := range mines {
+		rows[m[0]] = append(rows[m[0]], m[1])
+		cols[m[1]] = append(cols[m[1]], m[0])
+	}
+	for i := 0; i < n; i++ {
+		sort.Ints(rows[i])
+		sort.Ints(cols[i])
+	}
+	ans := 0
+	for r := 0; r < n; r++ {
+		row := rows[r]
+		if r+1 <= ans || (n-r) <= ans {
+			continue
+		}
+		for i := 1; i < len(row); i++ {
+			currC, lastC := row[i], row[i-1]
+			for maxOrder := (currC - lastC) / 2; maxOrder > ans; maxOrder-- {
+				c := lastC + maxOrder
+				lastRIndex := findBlock(cols[c], r, 0, len(cols[c])-1)
+				lastR, currR := cols[c][lastRIndex], cols[c][lastRIndex+1]
+				fmt.Printf("(%d, %d), r(%d, %d), c(%d, %d), min=%d\n", r, c, lastR, currR, lastC, currC, min(min(currR-r, r-lastR), maxOrder))
+				if min(min(currR-r, r-lastR), maxOrder) > ans {
+					ans = min(min(currR-r, r-lastR), maxOrder)
+				}
+				if c == currC-maxOrder {
+					continue
+				}
+				c = currC - maxOrder
+				lastRIndex = findBlock(cols[c], r, 0, len(cols[c])-1)
+				lastR, currR = cols[c][lastRIndex], cols[c][lastRIndex+1]
+				fmt.Printf("(%d, %d), r(%d, %d), c(%d, %d), min=%d\n", r, c, lastR, currR, lastC, currC, min(min(currR-r, r-lastR), maxOrder))
+				if min(min(currR-r, r-lastR), maxOrder) > ans {
+					ans = min(min(currR-r, r-lastR), maxOrder)
+				}
+			}
+		}
+	}
+	return ans
+}
+
+func min(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func findBlock(arr []int, target int, start int, end int) int {
+	if end <= start+1 {
+		return start
+	}
+	mid := (start + end) / 2
+	if arr[mid] < target {
+		return findBlock(arr, target, mid, end)
+	} else if arr[mid] > target {
+		return findBlock(arr, target, start, mid)
+	} else {
+		return mid
+	}
 }

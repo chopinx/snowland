@@ -202,7 +202,7 @@ func fastFindInCQ(nums []int, queue []int, start int, end int, target int) int {
 // Then, we can go through the echo element Si with index i in the ordered list,
 // which corresponds to the block array[i:i+k-1]. For k scores in the block array[i:i+k-1],
 // the difference between the largest score and the lowest score is array[i+k-1]-array[i].
-// If the max difference within the block array[i:i+k-1] is smaller than the MinDiff,
+// If the min difference within the block array[i:i+k-1] is smaller than the MinDiff,
 // replace the value of MinDiff with the smaller one.
 // After the traverse, we will get the result.
 func minimumDifference(nums []int, k int) int {
