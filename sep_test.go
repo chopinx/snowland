@@ -1,4 +1,4 @@
-package snowland
+package main
 
 import (
 	"math/rand"
@@ -250,6 +250,53 @@ func Test_orderOfLargestPlusSign(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := orderOfLargestPlusSign(tt.args.n, tt.args.mines); got != tt.want {
 				t.Errorf("orderOfLargestPlusSign() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_wiggleMaxLength(t *testing.T) {
+	type args struct {
+		nums []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "single",
+			args: args{
+				nums: []int{1},
+			},
+			want: 1,
+		},
+		{
+			name: "full",
+			args: args{
+				nums: []int{1, 2, 1, 3, 2, 4},
+			},
+			want: 6,
+		},
+		{
+			name: "sample",
+			args: args{
+				nums: []int{1, 2, 1, 3, 2, 2},
+			},
+			want: 5,
+		},
+		{
+			name: "sample",
+			args: args{
+				nums: []int{1, 2, 1, 1, 0, 3, 2, 4},
+			},
+			want: 6,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := wiggleMaxLength(tt.args.nums); got != tt.want {
+				t.Errorf("wiggleMaxLength() = %v, want %v", got, tt.want)
 			}
 		})
 	}

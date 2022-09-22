@@ -1,4 +1,4 @@
-package snowland
+package main
 
 import (
 	"fmt"
@@ -385,7 +385,7 @@ func findMinArrowShots2(points [][]int) int {
 	return ans
 }
 
-// 764. Largest Plus Sign
+// Problem No.764 Largest Plus Sign
 //
 // You are given an integer n. You have an n x n binary grid grid
 // with all values initially 1's except for some indices given in the array mines.
@@ -480,4 +480,176 @@ func findBlock(arr []int, target int, start int, end int) int {
 	} else {
 		return mid
 	}
+}
+
+// Problem No.1930 Unique Length-3 Palindromic Subsequences
+//
+// Given a string s, return the number of unique palindromes of length three that are a subsequence of s.
+// Note that even if there are multiple ways to obtain the same subsequence, it is still only counted once.
+// A palindrome is a string that reads the same forwards and backwards.
+// A subsequence of a string is a new string generated from the original string with some characters (can be none)
+// deleted without changing the relative order of the remaining characters.
+// For example, "ace" is a subsequence of "abcde".
+//
+// Example 1:
+// 		Input: s = "aabca"
+// 		Output: 3
+// 		Explanation: The 3 palindromic subsequences of length 3 are:
+// 		- "aba" (subsequence of "aabca")
+// 		- "aaa" (subsequence of "aabca")
+// 		- "aca" (subsequence of "aabca")
+//
+// Example 2:
+// 		Input: s = "adc"
+// 		Output: 0
+// 		Explanation: There are no palindromic subsequences of length 3 in "adc".
+//
+// Example 3:
+// 		Input: s = "bbcbaba"
+// 		Output: 4
+// 		Explanation: The 4 palindromic subsequences of length 3 are:
+// 		- "bbb" (subsequence of "bbcbaba")
+// 		- "bcb" (subsequence of "bbcbaba")
+// 		- "bab" (subsequence of "bbcbaba")
+// 		- "aba" (subsequence of "bbcbaba")
+//
+// Constraints:
+// 		3 <= s.length <= 10^5
+// 		s consists of only lowercase English letters
+func countPalindromicSubsequence(s string) int {
+	// go through the string and mark the first and the last index of each letter
+	maxIndex := make([]int, 26)
+	minIndex := make([]int, 26)
+	midLetters := make([]map[int]int, 26)
+	for i := 0; i < len(maxIndex); i++ {
+		maxIndex[i] = -1
+		minIndex[i] = -1
+		midLetters[i] = make(map[int]int)
+	}
+	for i, c := range s {
+		if minIndex[c-'a'] < 0 {
+			minIndex[c-'a'] = i
+		}
+		maxIndex[c-'a'] = i
+	}
+	for i, c := range s {
+		for j := 0; j < len(maxIndex); j++ {
+			if i > minIndex[j] && i < maxIndex[j] {
+				midLetters[j][int(c-'a')] = 0
+			}
+		}
+	}
+	ans := 0
+	for i := 0; i < len(midLetters); i++ {
+		ans += len(midLetters[i])
+	}
+	return ans
+}
+
+func countPalindromicSubsequence2(s string) int {
+	// you can reduce the memory usage by indexing all unique letters showed in the string
+	// but the memory cost is already O(1)
+	aheadCnt := make([][]int, 26)
+	for i := 0; i < 26; i++ {
+		aheadCnt[i] = make([]int, 27)
+	}
+	for _, c := range s {
+		for j := 0; j < 26; j++ {
+			if aheadCnt[j][c-'a'] == 0 {
+				aheadCnt[j][c-'a'] = aheadCnt[j][26] // mark the count of the jth letter ahead of the letter c
+			}
+			if j == int(c-'a') {
+				aheadCnt[j][26]++ // count letter c until so far
+			}
+		}
+	}
+	ans := 0
+	for i := 0; i < 26; i++ {
+		for j := 0; j < 26; j++ {
+			if aheadCnt[i][j] > 0 && aheadCnt[i][j] < aheadCnt[i][26] {
+				if i == j && aheadCnt[i][26] <= 2 {
+					continue // a length-3 palindromic subsequences need at least three same letters
+				}
+				// if the count of the ith letter ahead of the jth letter smaller the total count of the ith letter ahead,
+				// they should be length-3 palindromic subsequences
+				ans++
+			}
+		}
+	}
+	return ans
+}
+
+// Problem No.376 Wiggle Subsequence
+//
+// A wiggle sequence is a sequence where the differences between successive numbers strictly alternate between
+// positive and negative. The first difference (if one exists) may be either positive or negative.
+// A sequence with one element and a sequence with two non-equal elements are trivially wiggle sequences.
+//
+// For example, [1, 7, 4, 9, 2, 5] is a wiggle sequence because the differences (6, -3, 5, -7, 3)
+// alternate between positive and negative.
+// In contrast, [1, 4, 7, 2, 5] and [1, 7, 4, 5, 5] are not wiggle sequences.
+// The first is not because its first two differences are positive, and the second is not because its last difference is zero.
+// A subsequence is obtained by deleting some elements (possibly zero) from the original sequence,
+// leaving the remaining elements in their original order.
+//
+// Given an integer array nums, return the length of the longest wiggle subsequence of nums.
+//
+// Example 1:
+// 		Input: nums = [1,7,4,9,2,5]
+// 		Output: 6
+// 		Explanation: The entire sequence is a wiggle sequence with differences (6, -3, 5, -7, 3).
+//
+// Example 2:
+// 		Input: nums = [1,17,5,10,13,15,10,5,16,8]
+// 		Output: 7
+// 		Explanation: There are several subsequences that achieve this length.
+// 		One is [1, 17, 10, 13, 10, 16, 8] with differences (16, -7, 3, -3, 6, -8).
+//
+// Example 3:
+// 		Input: nums = [1,2,3,4,5,6,7,8,9]
+// 		Output: 2
+//
+// Constraints:
+// 		1 <= nums.length <= 1000
+// 		0 <= nums[i] <= 1000
+func wiggleMaxLength(nums []int) int {
+	if len(nums) <= 1 {
+		return len(nums)
+	}
+	start := 1
+	for start < len(nums) {
+		if nums[start]-nums[0] != 0 {
+			break
+		}
+		start++
+	}
+	if start >= len(nums) {
+		return 1
+	}
+	count, diff := 2, nums[start]-nums[0]
+	for i := start + 1; i < len(nums); i++ {
+		if nums[i]-nums[i-1] != 0 {
+			if (nums[i]-nums[i-1])*diff < 0 {
+				count++
+			}
+			diff = nums[i] - nums[i-1]
+		}
+	}
+	return count
+}
+
+func wiggleMaxLength2(nums []int) int {
+	upLen, downLen := 1, 1
+	for i := 1; i < len(nums); i++ {
+		if nums[i] < nums[i-1] {
+			downLen = upLen + 1
+		}
+		if nums[i] > nums[i-1] {
+			upLen = downLen + 1
+		}
+	}
+	if upLen > downLen {
+		return upLen
+	}
+	return downLen
 }

@@ -1,4 +1,4 @@
-package snowland
+package main
 
 import (
 	"reflect"
