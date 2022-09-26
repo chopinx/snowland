@@ -727,3 +727,114 @@ func isSubs(s string, p string, mask []int, limit int) bool {
 	}
 	return false
 }
+
+// 2410. Maximum Matching of Players With Trainers
+//
+// You are given a 0-indexed integer array players, where players[i] represents the ability of the ith player.
+// You are also given a 0-indexed integer array trainers, where trainers[j] represents the training capacity of the
+// jth trainer.
+//
+// The ith player can match with the jth trainer if the player's ability is less than or equal to the trainer's
+// training capacity. Additionally, the ith player can be matched with at most one trainer, and the jth trainer can be
+// matched with at most one player.
+//
+// Return the maximum number of matchings between players and trainers that satisfy these conditions.
+//
+// Example 1:
+// 		Input: players = [4,7,9], trainers = [8,2,5,8]
+// 		Output: 2
+// 		Explanation:
+// 		One of the ways we can form two matchings is as follows:
+// 		- players[0] can be matched with trainers[0] since 4 <= 8.
+// 		- players[1] can be matched with trainers[3] since 7 <= 8.
+// 		It can be proven that 2 is the maximum number of matchings that can be formed.
+//
+// Example 2:
+// 		Input: players = [1,1,1], trainers = [10]
+// 		Output: 1
+// 		Explanation:
+// 		The trainer can be matched with any of the 3 players.
+// 		Each player can only be matched with one trainer, so the maximum answer is 1.
+//
+// Constraints:
+// 		1 <= players.length, trainers.length <= 10^5
+// 		1 <= players[i], trainers[j] <= 10^9
+func matchPlayersAndTrainers(players []int, trainers []int) int {
+	sort.Ints(players)
+	sort.Ints(trainers)
+	j := 0
+	for i := 0; i < len(trainers) && j < len(players); i++ {
+		if trainers[i] >= players[j] {
+			j++
+		}
+	}
+	return j
+}
+
+// Problem No.1186 Maximum Subarray Sum with One Deletion
+//
+// Given an array of integers, return the maximum sum for a non-empty subarray (contiguous elements) with at most one
+// element deletion. In other words, you want to choose a subarray and optionally delete one element from it so that
+// there is still at least one element left and the sum of the remaining elements is maximum possible.
+//
+// Note that the subarray needs to be non-empty after deleting one element.
+//
+// Example 1:
+// 		Input: arr = [1,-2,0,3]
+// 		Output: 4
+// 		Explanation: Because we can choose [1, -2, 0, 3] and drop -2, thus the subarray [1, 0, 3] becomes the maximum value.
+//
+// Example 2:
+// 		Input: arr = [1,-2,-2,3]
+// 		Output: 3
+// 		Explanation: We just choose [3] and it's the maximum sum.
+//
+// Example 3:
+// 		Input: arr = [-1,-1,-1,-1]
+// 		Output: -1
+// 		Explanation: The final subarray needs to be non-empty. You can't choose [-1] and delete -1 from it, then get an empty subarray to make the sum equals to 0.
+//
+// Constraints:
+// 		1 <= arr.length <= 10^5
+// 		-10^4 <= arr[i] <= 10^4
+//
+// Solution
+//
+// We can use dynamic programming to solve this problem.
+// We can turn this problem into another problem as follows.
+// Find a subarray A(i) that consists of the first i+1 elements of the original array, and then get the maximum subarray
+// (which is the suffix of the A(i)) sum with one deletion (or without deletion), we denote them as S(i,0) and S(i, 1).
+// we go through every possible L1 and get the maximum answer of them. And that will be the answer to our original
+// problem.
+//
+// The new problem has an optimal substructure and lapping over sub-problem. If we get the S(i, 0) and the S(i, 1) of
+// the A(i), we can easily get the S(i+1, 0) and the S(i+1, 1)of the A(i+1) by following equation:
+// 		S(i+1, 0) = max(S(i,0), S(i,0)+a(i), a(i))
+// 		S(i+1, 1) = max(S(i,0), S(i,1)+a(i))
+//
+// Then, we can easily get out solution of the original problem:
+// def function
+// 		S(0, 0) = arr[0]
+// 		S(0, 1) = 0
+// 		ans = S(0, 0)
+// 		for i from 1 to len(arr)
+// 			S(i, 0) = max(S(i-1, 0)+arr[i], arr[i])
+// 			S(i, 1) = max(S(i-1, 0), S(i-1, 1)+arr[i])
+// 			ans = max(S(i, 0), S(i, 1)) if ans < max(S(i, 0), S(i, 1))
+// 		return ans
+func maximumSum(arr []int) int {
+	ans, deleted, noDeleted := arr[0], 0, arr[0]
+	for i := 1; i < len(arr); i++ {
+		deleted = max(noDeleted, deleted+arr[i])
+		noDeleted = max(arr[i], noDeleted+arr[i])
+		ans = max(max(deleted, noDeleted), ans)
+	}
+	return ans
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
