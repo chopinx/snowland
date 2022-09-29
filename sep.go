@@ -838,3 +838,100 @@ func max(a, b int) int {
 	}
 	return b
 }
+
+// Problem No.1262 Greatest Sum Divisible by Three
+//
+// Given an integer array nums, return the maximum possible sum of elements of the array such that it is divisible by
+// three.
+//
+// Example 1:
+// 		Input: nums = [3,6,5,1,8]
+// 		Output: 18
+// 		Explanation: Pick numbers 3, 6, 1 and 8 their sum is 18 (maximum sum divisible by 3).
+//
+// Example 2:
+// 		Input: nums = [4]
+// 		Output: 0
+// 		Explanation: Since 4 is not divisible by 3, do not pick any number.
+//
+// Example 3:
+// 		Input: nums = [1,2,3,4,4]
+// 		Output: 12
+// 		Explanation: Pick numbers 1, 3, 4 and 4 their sum is 12 (maximum sum divisible by 3).
+//
+// Constraints:
+// 		1 <= nums.length <= 4 * 10^4
+// 		1 <= nums[i] <= 10^4
+func maxSumDivThree(nums []int) int {
+	maxTable := [][]int{{0, 0, 0}, {0, 0, 0}}
+	for j, num := range nums {
+		last, curr := (j+1)%2, j%2
+		for i := 0; i < 3; i++ {
+			remainder := (i + num) % 3
+			if maxTable[last][i]%3 == i && maxTable[last][remainder] < maxTable[last][i]+num {
+				maxTable[curr][remainder] = maxTable[last][i] + num
+			} else {
+				maxTable[curr][remainder] = maxTable[last][remainder]
+			}
+		}
+	}
+	if maxTable[0][0] > maxTable[1][0] {
+		return maxTable[0][0]
+	}
+	return maxTable[1][0]
+}
+
+// Problem No.837 New 21 Game
+//
+// Alice plays the following game, loosely based on the card game "21".
+//
+// Alice starts with 0 points and draws numbers while she has less than k points. During each draw, she gains an integer
+// number of points randomly from the range [1, maxPts], where maxPts is an integer. Each draw is independent and the
+// outcomes have equal probabilities.
+//
+// Alice stops drawing numbers when she gets k or more points.
+//
+// Return the probability that Alice has n or fewer points.
+//
+// Answers within 10-5 of the actual answer are considered accepted.
+//
+//
+//
+// Example 1:
+// 		Input: n = 10, k = 1, maxPts = 10
+// 		Output: 1.00000
+// 		Explanation: Alice gets a single card, then stops.
+//
+// Example 2:
+// 		Input: n = 6, k = 1, maxPts = 10
+// 		Output: 0.60000
+// 		Explanation: Alice gets a single card, then stops.
+// 		In 6 out of 10 possibilities, she is at or below 6 points.
+//
+// Example 3:
+// 		Input: n = 21, k = 17, maxPts = 10
+// 		Output: 0.73278
+//
+// Constraints:
+// 		0 <= k <= n <= 10^4
+// 		1 <= maxPts <= 10^4
+func new21Game(n int, k int, maxPts int) float64 {
+	if n-k+1 >= maxPts || k == 0 {
+		return 1
+	}
+	ps := make([]float64, n+1)
+	ps[0] = 1
+	W, pSum, ans := float64(maxPts), 1.0, 0.0
+	for i := 1; i <= n; i++ {
+		ps[i] = pSum / W
+		if i < k {
+			pSum += ps[i]
+		} else {
+			ans += ps[i]
+		}
+		if i >= maxPts {
+			pSum -= ps[i-maxPts]
+		}
+	}
+	return ans
+}
