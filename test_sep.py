@@ -15,3 +15,5 @@ class TestSolution(TestCase):
         for case in cases:
             name, args, wants = case
             self.assertEqual(wants, sep.Solution().maxValue(*args), "name=%s" % name)
+
+    def test
