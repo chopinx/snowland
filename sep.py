@@ -111,3 +111,82 @@ class Solution:
             else:
                 res_map[sorted_word].append(word)
         return list(res_map.values())
+
+    # Problem No.127 Word Ladder
+    #
+    # A transformation sequence from word beginWord to word endWord using a dictionary wordList is a sequence of words
+    # beginWord -> s1 -> s2 -> ... -> sk such that:
+    #
+    # Every adjacent pair of words differs by a single letter.
+    # Every si for 1 <= i <= k is in wordList. Note that beginWord does not need to be in wordList.
+    # sk == endWord
+    # Given two words, beginWord and endWord, and a dictionary wordList, return the number of words in the shortest
+    # transformation sequence from beginWord to endWord, or 0 if no such sequence exists.
+    #
+    #
+    #
+    # Example 1:
+    #   Input: beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log","cog"]
+    #   Output: 5
+    #   Explanation: One shortest transformation sequence is "hit" -> "hot" -> "dot" -> "dog" -> cog", which is 5 words
+    #   long.
+    #
+    # Example 2:
+    #   Input: beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log"]
+    #   Output: 0
+    #   Explanation: The endWord "cog" is not in wordList, therefore there is no valid transformation sequence.
+    #
+    # Constraints:
+    #   1 <= beginWord.length <= 10
+    #   endWord.length == beginWord.length
+    #   1 <= wordList.length <= 5000
+    #   wordList[i].length == beginWord.length
+    #   beginWord, endWord, and wordList[i] consist of lowercase English letters.
+    #   beginWord != endWord
+    #   All the words in wordList are unique.
+    def ladderLength(self, beginWord: str, endWord: str, wordList: list) -> int:
+
+        def left(_word: str, _i: int):
+            return _word[:_i] + _word[_i + 1:]
+
+        index = [{} for _ in range(len(beginWord))]
+        for word in wordList:
+            for i in range(len(beginWord)):
+                if index[i].get(left(word, i)) is None:
+                    index[i][left(word, i)] = [word]
+                else:
+                    index[i][left(word, i)].append(word)
+
+        if endWord not in wordList:
+            return 0
+        b_wait_list = {beginWord}
+        b_visited = {beginWord}
+        e_wait_list = {endWord}
+        e_visited = {endWord}
+        ans = 1
+        while len(b_wait_list) > 0 and len(e_wait_list) > 0:
+            b_wait_set = set()
+            ans += 1
+            for curr in b_wait_list:
+                for i in range(len(beginWord)):
+                    for word in index[i].get(left(curr, i), []):
+                        if word not in b_visited:
+                            b_visited.add(word)
+                            b_wait_set.add(word)
+                        if word in e_wait_list:
+                            return ans
+            b_wait_list = b_wait_set
+
+            if len(b_wait_list) < len(e_wait_list):
+                e_wait_set = set()
+                ans += 1
+                for curr in e_wait_list:
+                    for i in range(len(beginWord)):
+                        for word in index[i].get(left(curr, i), []):
+                            if word not in e_visited:
+                                e_visited.add(word)
+                                e_wait_set.add(word)
+                            if word in b_wait_list:
+                                return ans
+                e_wait_list = e_wait_set
+        return 0
