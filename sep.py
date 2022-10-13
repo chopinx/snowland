@@ -1,3 +1,19 @@
+from typing import Optional, List
+
+
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+
+    def __hash__(self):
+        return hash(self.val)
+
+    def __eq__(self, other):
+        return self.val == other.val
+
+
 class Solution:
     # Problem No.1881 Maximum Value after Insertion
     #
@@ -190,3 +206,129 @@ class Solution:
                                 return ans
                 e_wait_list = e_wait_set
         return 0
+
+    # Problem No.138 Copy List with Random Pointer
+    #
+    # A linked list of length n is given such that each node contains an additional random pointer, which could point
+    # to any node in the list, or null.
+    #
+    # Construct a deep copy of the list. The deep copy should consist of exactly n brand new nodes, where each new node
+    # has its value set to the value of its corresponding original node. Both the next and random pointer of the new
+    # nodes should point to new nodes in the copied list such that the pointers in the original list and copied list
+    # represent the same list state. None of the pointers in the new list should point to nodes in the original list.
+    #
+    # For example, if there are two nodes X and Y in the original list, where X.random --> Y, then for the corresponding
+    # two nodes x and y in the copied list, x.random --> y.
+    #
+    # Return the head of the copied linked list.
+    #
+    # The linked list is represented in the input/output as a list of n nodes. Each node is represented as a pair of
+    # [val, random_index] where:
+    #
+    # val: an integer representing Node.val
+    # random_index: the index of the node (range from 0 to n-1) that the random pointer points to, or null if it does
+    # not point to any node.
+    # Your code will only be given the head of the original linked list.
+    #
+    # Example 1:
+    #   Input: head = [[7,null],[13,0],[11,4],[10,2],[1,0]]
+    #   Output: [[7,null],[13,0],[11,4],[10,2],[1,0]]
+    #
+    # Example 2:
+    #   Input: head = [[1,1],[2,1]]
+    #   Output: [[1,1],[2,1]]
+    #
+    # Example 3:
+    #   Input: head = [[3,null],[3,0],[3,null]]
+    #   Output: [[3,null],[3,0],[3,null]]
+    #
+    # Constraints:
+    #   0 <= n <= 1000
+    #   -10^4 <= Node.val <= 10^4
+    #   Node.random is null or is pointing to some node in the linked list.
+    """
+    # Definition for a Node.
+    class Node:
+        def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+            self.val = int(x)
+            self.next = next
+            self.random = random
+    """
+
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+        node_list = []
+
+        node_map = {}
+        curr = head
+        # get node list and node map
+        while curr is not None:
+            node_list.append(curr)
+            node_map[curr] = len(node_list) - 1
+            curr = curr.next
+        print(node_list)
+
+        new_node_list = [Node(0) for _ in range(len(node_list))]
+        new_head = new_node_list[0]
+        for i in range(len(node_list)):
+            new_node_list[i].val = node_list[i].val
+            if i < len(node_list) - 1:
+                new_node_list[i].next = new_node_list[i + 1]
+
+        # get random list
+        random_list = [-1 for _ in range(len(node_list))]
+        for i in range(len(node_list)):
+            curr = node_list[i]
+            if curr.random is not None:
+                new_node_list[i].random = new_node_list[node_map[curr.random]]
+
+        return new_head
+
+    # Problem No.140 Word Break II
+    #
+    # Given a string s and a dictionary of strings wordDict, add spaces in s to construct a sentence where each word is
+    # a valid dictionary word. Return all such possible sentences in any order.
+    #
+    # Note that the same word in the dictionary may be reused multiple times in the segmentation.
+    #
+    # Example 1:
+    #   Input: s = "catsanddog", wordDict = ["cat","cats","and","sand","dog"]
+    #   Output: ["cats and dog","cat sand dog"]
+    #
+    # Example 2:
+    #   Input: s = "pineapplepenapple", wordDict = ["apple","pen","applepen","pine","pineapple"]
+    #   Output: ["pine apple pen apple","pineapple pen apple","pine applepen apple"]
+    #   Explanation: Note that you are allowed to reuse a dictionary word.
+    #
+    # Example 3:
+    #   Input: s = "catsandog", wordDict = ["cats","dog","sand","and","cat"]
+    #   utput: []
+    #
+    # Constraints:
+    #   1 <= s.length <= 20
+    #   1 <= wordDict.length <= 1000
+    #   1 <= wordDict[i].length <= 10
+    #   s and wordDict[i] consist of only lowercase English letters.
+    #   All the strings of wordDict are unique.
+    def wordBreak(self, s: str, wordDict: 'List[str]') -> 'List[str]':
+        completed, uncompleted = {"": ""}, {"": ""}
+        word_set = set(wordDict)
+        for c in s:
+            new_c, new_unc = {}, {}
+            for sub_s in completed.keys():
+                if c in word_set:
+                    new_c[(sub_s + " " + c).strip()] = c
+                else:
+                    new_unc[(sub_s + " " + c).strip()] = c
+                new_word = completed[sub_s] + c
+                if new_word in word_set:
+                    new_c[(sub_s.removesuffix(completed[sub_s]) + new_word).strip()] = new_word
+                else:
+                    new_unc[(sub_s.removesuffix(completed[sub_s]) + new_word).strip()] = new_word
+            for sub_s in uncompleted.keys():
+                new_word = uncompleted[sub_s] + c
+                if new_word in word_set:
+                    new_c[(sub_s.removesuffix(uncompleted[sub_s]) + new_word).strip()] = new_word
+                else:
+                    new_unc[(sub_s.removesuffix(uncompleted[sub_s]) + new_word).strip()] = new_word
+            completed, uncompleted = new_c, new_unc
+        return list(completed.keys())
