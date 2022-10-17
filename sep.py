@@ -395,3 +395,6 @@ class LRUCache:
         self.kv[key] = value
         if len(self.kv) > self.capacity:
             self.kv.popitem(last=False)
+
+
+
