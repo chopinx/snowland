@@ -244,3 +244,62 @@ class Solution:
                 ep += 1
             ans += 1
         return ans
+
+    # Problem No.273 Integer to English Words
+    #
+    # Convert a non-negative integer num to its English words representation.
+    #
+    # Example 1:
+    #   Input: num = 123
+    #   Output: "One Hundred Twenty Three"
+    #
+    # Example 2:
+    #   Input: num = 12345
+    #   Output: "Twelve Thousand Three Hundred Forty Five"
+    #
+    # Example 3:
+    #   Input: num = 1234567
+    #   Output: "One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven"
+    #
+    # Constraints:
+    #   0 <= num <= 2^31 - 1
+    def numberToWords(self, num: int) -> str:
+        if num == 0:
+            return 'Zero'
+        units = ['Billion', 'Thousand', 'Million']
+        words = []
+        i = 0
+        while num > 0:
+            reminder = num % 1000
+            sub_list = self.smallToWords(reminder)
+            if len(sub_list) > 0:
+                words = sub_list + ([units[i % 3]] if i > 0 else []) + words
+            i += 1
+            num //= 1000
+        return ' '.join(words).strip()
+
+    def smallToWords(self, num: int) -> list:
+        """
+        Convert a small number to its English words representation. 
+        :param num: 0 <= num < 1000
+        :return: 
+        """
+        hundred_word = 'Hundred'
+        digits = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
+        teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen',
+                 'Nineteen']
+        tys = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
+        hundred = num // 100
+        ten = (num - hundred * 100) // 10
+        one = num % 10
+        ans = []
+        if hundred > 0:
+            ans.append(digits[hundred])
+            ans.append(hundred_word)
+        if ten == 1:
+            ans.append(teens[one])
+        elif ten > 1:
+            ans.append(tys[ten])
+        if ten != 1 and one > 0:
+            ans.append(digits[one])
+        return ans

@@ -30,3 +30,19 @@ class TestSolution(TestCase):
         for i in range(len(cases)):
             name, args, wants = cases[i]
             self.assertEqual(wants, oct.Solution().intToRoman(*args), "[%d]name=%s" % (i, name))
+
+    def test_numberToWords(self):
+        cases = [
+            # name, args, wants
+            ("sample", (123,), "One Hundred Twenty Three"),
+            ("sample", (0,), "Zero"),
+            ("sample", (12345,), "Twelve Thousand Three Hundred Forty Five"),
+            ("sample", (1234567,), "One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven"),
+            ("sample", (12345671234567,),
+             "Twelve Thousand Three Hundred Forty Five Billion Six Hundred Seventy One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven"),
+            ("sample", (1000000,), "One Million"),
+            ("sample", (1000001,), "One Million One"),
+        ]
+        for i in range(len(cases)):
+            name, args, wants = cases[i]
+            self.assertEqual(wants, oct.Solution().numberToWords(*args), "[%d]name=%s" % (i, name))
