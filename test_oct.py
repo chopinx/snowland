@@ -46,3 +46,14 @@ class TestSolution(TestCase):
         for i in range(len(cases)):
             name, args, wants = cases[i]
             self.assertEqual(wants, oct.Solution().numberToWords(*args), "[%d]name=%s" % (i, name))
+
+    def test_findAllConcatenatedWordsInADict(self):
+        cases = [
+            # name, args, wants
+            ("sample", (["ab", "a", "b"],), ["ab"]),
+            ("sample", (["abcd", "ab", "cd", "a"],), ["abcd"]),
+            ("sample", (["abcd", "ab", "c", "a", "abc", "d"],), ["abcd", "abc"]),
+        ]
+        for i in range(len(cases)):
+            name, args, wants = cases[i]
+            self.assertEqual(wants, oct.Solution().findAllConcatenatedWordsInADict(*args), "[%d]name=%s" % (i, name))

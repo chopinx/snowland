@@ -383,3 +383,44 @@ class Solution:
         if ten != 1 and one > 0:
             ans.append(digits[one])
         return ans
+
+    # Problem No.472 Concatenated Words
+    #
+    # Given an array of strings words (without duplicates), return all the concatenated words in the given list of
+    # words.
+    #
+    # A concatenated word is defined as a string that is comprised entirely of at least two shorter words in the given
+    # array.
+    #
+    # Example 1:
+    #   Input: words = ["cat","cats","catsdogcats","dog","dogcatsdog","hippopotamuses","rat","ratcatdogcat"]
+    #   Output: ["catsdogcats","dogcatsdog","ratcatdogcat"]
+    #   Explanation: "catsdogcats" can be concatenated by "cats", "dog" and "cats";
+    #   "dogcatsdog" can be concatenated by "dog", "cats" and "dog";
+    #   "ratcatdogcat" can be concatenated by "rat", "cat", "dog" and "cat".
+    #
+    # Example 2:
+    #   Input: words = ["cat","dog","catdog"]
+    #   Output: ["catdog"]
+    #
+    # Constraints:
+    #   1 <= words.length <= 10^4
+    #   1 <= words[i].length <= 30
+    #   words[i] consists of only lowercase English letters.
+    #   All the strings of words are unique.
+    #   1 <= sum(words[i].length) <= 105
+    def findAllConcatenatedWordsInADict(self, words: List[str]) -> List[str]:
+        ans = []
+        word_set = set(words)
+        for word in words:
+            candidates = [0]
+            for i in range(len(word)):
+                for candidate in candidates:
+                    if candidate > i:
+                        continue
+                    if word[candidate:i + 1] in word_set:
+                        candidates.append(i + 1)
+                        if candidate > 0 and i == len(word) - 1:
+                            ans.append(word)
+                            break
+        return ans
