@@ -86,6 +86,11 @@ class ParkingSystem:
 # Follow up:
 #   If all integer numbers from the stream are in the range [0, 100], how would you optimize your solution?
 #   If 99% of all integer numbers from the stream are in the range [0, 100], how would you optimize your solution?
+#
+# Your MedianFinder object will be instantiated and called as such:
+# obj = MedianFinder()
+# obj.addNum(num)
+# param_2 = obj.findMedian()
 class MedianFinder:
     def __init__(self):
         self.low_list = []
@@ -120,18 +125,6 @@ class MedianFinder:
         if len(self.high_list) > len(self.low_list):
             return self.high_list[0]
         return (self.high_list[0] - self.low_list[0]) / 2
-
-
-# Your MedianFinder object will be instantiated and called as such:
-# obj = MedianFinder()
-# obj.addNum(num)
-# param_2 = obj.findMedian()
-
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
 
 
 class Solution:
@@ -479,6 +472,12 @@ class Solution:
     #   -1000 <= Node.val <= 1000
     #
     # Definition for a binary tree node.
+
+    class TreeNode:
+        def __init__(self, val=0, left=None, right=None):
+            self.val = val
+            self.left = left
+            self.right = right
 
     def visit_left(self, node: Optional[TreeNode], p_is_b: bool, has_left: bool, left_b: list, leaves: list):
         if node.left is None and node.right is None:
