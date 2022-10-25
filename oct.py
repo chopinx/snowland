@@ -1,5 +1,5 @@
 import heapq
-from typing import List
+from typing import List, Optional
 
 
 # Problem No.1603 Design Parking System
@@ -126,6 +126,13 @@ class MedianFinder:
 # obj = MedianFinder()
 # obj.addNum(num)
 # param_2 = obj.findMedian()
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
 
 class Solution:
     # Problem No.207 Course Schedule
@@ -424,3 +431,87 @@ class Solution:
                             ans.append(word)
                             break
         return ans
+
+    # Problem No.545 Boundary of Binary Tree
+    #
+    # The boundary of a binary tree is the concatenation of the root, the left boundary, the leaves ordered from
+    # left-to-right, and the reverse order of the right boundary.
+    #
+    # The left boundary is the set of nodes defined by the following:
+    #
+    # The root node's left child is in the left boundary. If the root does not have a left child, then the left boundary
+    # is empty.
+    # If a node in the left boundary and has a left child, then the left child is in the left boundary.
+    # If a node is in the left boundary, has no left child, but has a right child, then the right child is in the left
+    # boundary.
+    # The leftmost leaf is not in the left boundary.
+    # The right boundary is similar to the left boundary, except it is the right side of the root's right subtree.
+    # Again, the leaf is not part of the right boundary, and the right boundary is empty if the root does not have a
+    # right child.
+    #
+    # The leaves are nodes that do not have any children. For this problem, the root is not a leaf.
+    #
+    # Given the root of a binary tree, return the values of its boundary.
+    #
+    # Example 1:
+    #   Input: root = [1,null,2,3,4]
+    #   Output: [1,3,4,2]
+    #   Explanation:
+    #   - The left boundary is empty because the root does not have a left child.
+    #   - The right boundary follows the path starting from the root's right child 2 -> 4.
+    #     4 is a leaf, so the right boundary is [2].
+    #   - The leaves from left to right are [3,4].
+    #   Concatenating everything results in [1] + [] + [3,4] + [2] = [1,3,4,2].
+    #
+    # Example 2:
+    #   Input: root = [1,2,3,4,5,6,null,null,null,7,8,9,10]
+    #   Output: [1,2,4,7,8,9,10,6,3]
+    #   Explanation:
+    #   - The left boundary follows the path starting from the root's left child 2 -> 4.
+    #     4 is a leaf, so the left boundary is [2].
+    #   - The right boundary follows the path starting from the root's right child 3 -> 6 -> 10.
+    #     10 is a leaf, so the right boundary is [3,6], and in reverse order is [6,3].
+    #   - The leaves from left to right are [4,7,8,9,10].
+    #   Concatenating everything results in [1] + [2] + [4,7,8,9,10] + [6,3] = [1,2,4,7,8,9,10,6,3].
+    #
+    # Constraints:
+    #   The number of nodes in the tree is in the range [1, 104].
+    #   -1000 <= Node.val <= 1000
+    #
+    # Definition for a binary tree node.
+
+    def visit_left(self, node: Optional[TreeNode], p_is_b: bool, has_left: bool, left_b: list, leaves: list):
+        if node.left is None and node.right is None:
+            # leave node
+            leaves.append(node.val)
+            return
+        is_left_b = p_is_b and not has_left
+        if is_left_b:
+            # left boundary
+            left_b.append(node.val)
+        if node.left is not None:
+            self.visit_left(node.left, is_left_b, False, left_b, leaves)
+        if node.right is not None:
+            self.visit_left(node.right, is_left_b, node.left is not None, left_b, leaves)
+
+    def visit_right(self, node: Optional[TreeNode], p_is_b: bool, has_right: bool, right_b: list, leaves: list):
+        if node.left is None and node.right is None:
+            # leave node
+            leaves.append(node.val)
+            return
+        is_right_b = p_is_b and not has_right
+        if node.left is not None:
+            self.visit_right(node.left, is_right_b, node.right is not None, right_b, leaves)
+        if node.right is not None:
+            self.visit_right(node.right, is_right_b, False, right_b, leaves)
+        if is_right_b:
+            # right boundary
+            right_b.append(node.val)
+
+    def boundaryOfBinaryTree(self, root: Optional[TreeNode]) -> List[int]:
+        left_b, right_b, left_leaves, right_leaves = [], [], [], []
+        if root.left is not None:
+            self.visit_left(root.left, True, False, left_b, left_leaves)
+        if root.right is not None:
+            self.visit_right(root.right, True, False, right_b, right_leaves)
+        return [root.val] + left_b + left_leaves + right_leaves + right_b
