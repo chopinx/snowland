@@ -1,5 +1,13 @@
 import heapq
+from collections import Counter
 from typing import List, Optional
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
 # Problem No.588 Design a data structure that simulates an in-memory file system.
@@ -570,12 +578,6 @@ class Solution:
     #
     # Definition for a binary tree node.
 
-    class TreeNode:
-        def __init__(self, val=0, left=None, right=None):
-            self.val = val
-            self.left = left
-            self.right = right
-
     def visit_left(self, node: Optional[TreeNode], p_is_b: bool, has_left: bool, left_b: list, leaves: list):
         if node.left is None and node.right is None:
             # leave node
@@ -660,3 +662,151 @@ class Solution:
             s += i - j
         return s
 
+    # 767. Reorganize String
+    #
+    # Given a string s, rearrange the characters of s so that any two adjacent characters are not the same.
+    #
+    # Return any possible rearrangement of s or return "" if not possible.
+    #
+    # Example 1:
+    #   Input: s = "aab"
+    #   Output: "aba"
+    #
+    # Example 2:
+    #   Input: s = "aaab"
+    #   Output: ""
+    #
+    # Constraints:
+    #   1 <= s.length <= 500
+    #   s consists of lowercase English letters.
+    def reorganizeString(self, s: str) -> str:
+        cnt, half = Counter(s), (len(s) + 1) // 2
+        letters = cnt.most_common()
+        if letters[0][1] > half:
+            return ""
+        ans = []
+        for char, cnt in letters:
+            ans += [char] * cnt
+        ans[::2], ans[1::2] = ans[:half], ans[half:]
+        return "".join(ans)
+
+    # Problem No.2455 Average Value of Even Numbers That Are Divisible by Three
+    def averageValue(self, nums: List[int]) -> int:
+        sum, cnt = 0, 0
+        for n in nums:
+            if n % 2 == 0 and n % 3 == 0:
+                sum += n
+                cnt += 1
+        return sum // cnt
+
+    # Problem No.2456 Most Popular Video Creator
+    def mostPopularCreator(self, creators: List[str], ids: List[str], views: List[int]) -> List[List[str]]:
+        c_cnt = {}
+        c_ids_cnt = {}
+        max_creators = []
+        max_c_views = 0
+        for i in range(len(creators)):
+            creator, id_, cnt = creators[i], ids[i], views[i]
+            if creator not in c_cnt:
+                c_cnt[creator] = cnt
+            else:
+                c_cnt[creator] += cnt
+            if c_cnt[creator] > max_c_views:
+                max_c_views = c_cnt[creator]
+                max_creators = [creator]
+            elif c_cnt[creator] == max_c_views:
+                max_creators.append(creator)
+            if creator not in c_ids_cnt:
+                c_ids_cnt[creator] = (id_, cnt)
+            else:
+                if cnt > c_ids_cnt[creator][1]:
+                    c_ids_cnt[creator] = (id_, cnt)
+                elif cnt == c_ids_cnt[creator][1] and id_ < c_ids_cnt[creator][0]:
+                    c_ids_cnt[creator] = (id_, cnt)
+        ans = []
+        for creator in set(max_creators):
+            ans.append([creator, c_ids_cnt[creator][0]])
+        return ans
+
+    # Problem No.2457 Minimum Addition to Make Integer Beautiful
+    def makeIntegerBeautiful(self, n: int, target: int) -> int:
+        d_list = []
+        curr = n
+        while curr > 0:
+            d_list.append(curr % 10)
+            curr //= 10
+        d_list.append(0)
+        s = sum(d_list)
+        if s <= target:
+            return 0
+        p = 0
+        ans = 0
+        while s > target:
+            if d_list[p] == 0:
+                p += 1
+                continue
+            ans += (10 ** p) * (10 - d_list[p])
+            s -= d_list[p] - 1
+            d_list[p] = 0
+            d_list[p + 1] += 1
+            p += 1
+            while d_list[p] >= 10:
+                s -= d_list[p] - d_list[p] % 10 - 1
+                d_list[p] = d_list[p] % 10
+                d_list[p + 1] += 1
+                p += 1
+        return ans
+
+    # Problem No.2458 Height of Binary Tree After Subtree Removal Queries
+    def treeQueries(self, root: Optional[TreeNode], queries: List[int]) -> List[int]:
+        hights, depths, row_max = [], [], []
+        self.visit(root, hights, depths, row_max, 0)
+        ans = []
+        for q in queries:
+            row = row_max[depths[q]]
+            if row[0] > 0 and row[0] != q:
+                ans.append(depths[row[0]] + hights[row[0]])
+            elif row[1] > 0 and row[1] != q:
+                ans.append(depths[row[1]] + hights[row[1]])
+            else:
+                ans.append(depths[q]-1)
+        return ans
+
+    def visit(self, root: Optional[TreeNode], hights: list, depths: list, row_max:list, depth):
+        if root is None:
+            return
+        if root.val > len(hights) - 1:
+            hights += [-1] * (root.val - len(hights) + 1)
+        if root.val > len(depths) - 1:
+            depths += [-1] * (root.val - len(depths) + 1)
+        if depth > len(row_max) - 1:
+            row_max += [[0, 0] for _ in range(depth - len(row_max) + 1)]
+        depths[root.val] = depth
+        self.visit(root.left, hights, depths, row_max, depth+1)
+        self.visit(root.right, hights, depths, row_max, depth+1)
+        if root.left is None and root.right is None:
+            hights[root.val] = 0
+        if root.left:
+            hights[root.val] = hights[root.left.val] + 1
+        if root.right and hights[root.right.val] + 1> hights[root.val]:
+            hights[root.val] = hights[root.right.val] + 1
+        if hights[row_max[depth][0]] < hights[root.val]:
+            row_max[depth][0], row_max[depth][1] = root.val, row_max[depth][0]
+        elif hights[row_max[depth][1]] < hights[root.val]:
+            row_max[depth][1] = root.val
+
+
+if __name__ == '__main__':
+    print(Solution().makeIntegerBeautiful(16, 6))
+    print(Solution().makeIntegerBeautiful(467, 6))
+    print(Solution().makeIntegerBeautiful(1, 1))
+    print(Solution().makeIntegerBeautiful(846, 1))
+    print(Solution().makeIntegerBeautiful(590, 1))
+    print(Solution().makeIntegerBeautiful(213620191, 16))
+
+    # chars = [random.choice("abcdefghijklmnopqrstuvwxyz")] * 1000
+    # print(timeit.timeit(lambda: build1(chars), number=10000))
+    # print(timeit.timeit(lambda: build2(chars), number=10000))
+    # print(timeit.timeit(lambda: append1(), number=10000))
+    # print(timeit.timeit(lambda: append2(), number=10000))
+    # print(timeit.timeit(lambda: append3(), number=10000))
