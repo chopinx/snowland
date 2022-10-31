@@ -769,10 +769,10 @@ class Solution:
             elif row[1] > 0 and row[1] != q:
                 ans.append(depths[row[1]] + hights[row[1]])
             else:
-                ans.append(depths[q]-1)
+                ans.append(depths[q] - 1)
         return ans
 
-    def visit(self, root: Optional[TreeNode], hights: list, depths: list, row_max:list, depth):
+    def visit(self, root: Optional[TreeNode], hights: list, depths: list, row_max: list, depth):
         if root is None:
             return
         if root.val > len(hights) - 1:
@@ -782,18 +782,58 @@ class Solution:
         if depth > len(row_max) - 1:
             row_max += [[0, 0] for _ in range(depth - len(row_max) + 1)]
         depths[root.val] = depth
-        self.visit(root.left, hights, depths, row_max, depth+1)
-        self.visit(root.right, hights, depths, row_max, depth+1)
+        self.visit(root.left, hights, depths, row_max, depth + 1)
+        self.visit(root.right, hights, depths, row_max, depth + 1)
         if root.left is None and root.right is None:
             hights[root.val] = 0
         if root.left:
             hights[root.val] = hights[root.left.val] + 1
-        if root.right and hights[root.right.val] + 1> hights[root.val]:
+        if root.right and hights[root.right.val] + 1 > hights[root.val]:
             hights[root.val] = hights[root.right.val] + 1
         if hights[row_max[depth][0]] < hights[root.val]:
             row_max[depth][0], row_max[depth][1] = root.val, row_max[depth][0]
         elif hights[row_max[depth][1]] < hights[root.val]:
             row_max[depth][1] = root.val
+
+    # Problem No.828 Count Unique Characters of All Substrings of a Given String
+    #
+    # Let's define a function countUniqueChars(s) that returns the number of unique characters on s.
+    #
+    # For example, calling countUniqueChars(s) if s = "LEETCODE" then "L", "T", "C", "O", "D" are the unique characters
+    # since they appear only once in s, therefore countUniqueChars(s) = 5.
+    # Given a string s, return the sum of countUniqueChars(t) where t is a substring of s. The test cases are generated
+    # such that the answer fits in a 32-bit integer.
+    #
+    # Notice that some substrings can be repeated so in this case you have to count the repeated ones too.
+    #
+    # Example 1:
+    #   Input: s = "ABC"
+    #   Output: 10
+    #   Explanation: All possible substrings are: "A","B","C","AB","BC" and "ABC".
+    #   Every substring is composed with only unique letters.
+    #   Sum of lengths of all substring is 1 + 1 + 1 + 2 + 2 + 3 = 10
+    #
+    # Example 2:
+    #   Input: s = "ABA"
+    #   Output: 8
+    #   Explanation: The same as example 1, except countUniqueChars("ABA") = 1.
+    #
+    # Example 3:
+    #   Input: s = "LEETCODE"
+    #   Output: 92
+    #
+    # Constraints:
+    #   1 <= s.length <= 105
+    #   s consists of uppercase English letters only.
+    def uniqueLetterString(self, s: str) -> int:
+        last_two = {c: [-1, -1] for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"}
+        diff = 0
+        ans = 0
+        for i, c in enumerate(s):
+            diff += i - last_two[c][0] - (last_two[c][0] - last_two[c][1])
+            last_two[c][1], last_two[c][0] = last_two[c][0], i
+            ans += diff
+        return ans
 
 
 if __name__ == '__main__':
