@@ -835,6 +835,67 @@ class Solution:
             ans += diff
         return ans
 
+    # Problem No.863 All Nodes Distance K in Binary Tree
+    #
+    # Given the root of a binary tree, the value of a target node target, and an integer k, return an array of the
+    # values of all nodes that have a distance k from the target node.
+    #
+    # You can return the answer in any order.
+    #
+    # Example 1:
+    #   Input: root = [3,5,1,6,2,0,8,null,null,7,4], target = 5, k = 2
+    #   Output: [7,4,1]
+    #   Explanation: The nodes that are a distance 2 from the target node (with value 5) have values 7, 4, and 1.
+    #
+    # Example 2:
+    #   Input: root = [1], target = 1, k = 3
+    #   Output: []
+    #
+    # Constraints:
+    #   The number of nodes in the tree is in the range [1, 500].
+    #   0 <= Node.val <= 500
+    #   All the values Node.val are unique.
+    #   target is the value of one of the nodes in the tree.
+    #   0 <= k <= 1000
+    def distanceK(self, root: TreeNode, target: TreeNode, k: int) -> List[int]:
+        path = []
+        self.find_path(root, target, path)
+        ans = []
+        for i, v in enumerate(path):
+            left_dis = k - len(path) + i
+            if left_dis < 0 or i == len(path) - 1:
+                continue
+            if path[i + 1] != v.left:
+                ans += self.distance_x(v.left, left_dis)
+            if path[i + 1] != v.right:
+                ans += self.distance_x(v.right, left_dis)
+        ans += self.distance_x(path[-1], k)
+        if len(path) >= k + 1:
+            ans.append(path[-k - 1].val)
+        return list(set(ans))
+
+    def find_path(self, root: TreeNode, target: TreeNode, path: list) -> bool:
+        if root is None:
+            return False
+        path.append(root)
+        if root.val == target.val:
+            return True
+        if self.find_path(root.left, target, path):
+            return True
+        if self.find_path(root.right, target, path):
+            return True
+        path.pop()
+        return False
+
+    def distance_x(self, root: TreeNode, x: int) -> List[int]:
+        if root is None:
+            return []
+        if x == 0:
+            return [root.val]
+        a = self.distance_x(root.left, x - 1)
+        b = self.distance_x(root.right, x - 1)
+        return a + b
+
 
 if __name__ == '__main__':
     print(Solution().makeIntegerBeautiful(16, 6))
