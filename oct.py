@@ -1082,6 +1082,74 @@ class Solution:
         elif low > k:
             self.sort(points, start, low - 2, k)
 
+    # Problem No.994 Rotting Oranges
+    #
+    # You are given an m x n grid where each cell can have one of three values:
+    #
+    # 0 representing an empty cell,
+    # 1 representing a fresh orange, or
+    # 2 representing a rotten orange.
+    # Every minute, any fresh orange that is 4-directionally adjacent to a rotten orange becomes rotten.
+    #
+    # Return the minimum number of minutes that must elapse until no cell has a fresh orange. If this is impossible,
+    # return -1.
+    #
+    # Example 1:
+    #   Input: grid = [[2,1,1],[1,1,0],[0,1,1]]
+    #   Output: 4
+    #
+    # Example 2:
+    #   Input: grid = [[2,1,1],[0,1,1],[1,0,1]]
+    #   Output: -1
+    #   Explanation: The orange in the bottom left corner (row 2, column 0) is never rotten, because rotting only
+    #   happens 4-directionally.
+    #
+    # Example 3:
+    #   Input: grid = [[0,2]]
+    #   Output: 0
+    #   Explanation: Since there are already no fresh oranges at minute 0, the answer is just 0.
+    #
+    # Constraints:
+    #   m == grid.length
+    #   n == grid[i].length
+    #   1 <= m, n <= 10
+    #   grid[i][j] is 0, 1, or 2.
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        m, n = len(grid), len(grid[0])
+
+        def neighbors(_i):
+            _i, _j = _i // n, _i % n
+            if _i - 1 >= 0:
+                yield (_i - 1) * n + _j
+            if _i + 1 < m:
+                yield (_i + 1) * n + _j
+            if _j - 1 >= 0:
+                yield _i * n + _j - 1
+            if _j + 1 < n:
+                yield _i * n + _j + 1
+
+        rotten = set()
+        total = minutes = 0
+        for i, row in enumerate(grid):
+            for j, d in enumerate(grid[i]):
+                if d == 2:
+                    rotten.add(i * n + j)
+                if d == 1:
+                    total += 1
+        while total > 0 and len(rotten) > 0:
+            minutes += 1
+            new_rotten = set()
+            for i in rotten:
+                for ni in neighbors(i):
+                    if grid[ni // n][ni % n] == 1:
+                        grid[ni // n][ni % n] = 2
+                        new_rotten.add(ni)
+                        total -= 1
+            rotten = new_rotten
+        if total > 0:
+            return -1
+        return minutes
+
 
 if __name__ == '__main__':
     print(list(range(1, 6)))
