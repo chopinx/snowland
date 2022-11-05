@@ -1,6 +1,6 @@
 import heapq
 import random
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import List, Optional
 
 
@@ -1149,6 +1149,59 @@ class Solution:
         if total > 0:
             return -1
         return minutes
+
+    # Problem No.1044 Longest Duplicate Substring
+    #
+    # Given a string s, consider all duplicated substrings: (contiguous) substrings of s that occur 2 or more times.
+    # The occurrences may overlap.
+    #
+    # Return any duplicated substring that has the longest possible length. If s does not have a duplicated substring,
+    # the answer is "".
+    #
+    # Example 1:
+    #   Input: s = "banana"
+    #   Output: "ana"
+    #
+    # Example 2:
+    #   Input: s = "abcd"
+    #   Output: ""
+    #
+    # Constraints:
+    #   2 <= s.length <= 3 * 104
+    #   s consists of lowercase English letters.
+    def longestDupSubstring(self, s: str) -> str:
+        int_s = [0] * len(s)
+        for i in range(len(s)):
+            int_s[i] = ord(s[i]) - ord('a')
+        low, high = 1, len(s) - 1
+        ans = ""
+        while low <= high:
+            mid = (high + low) // 2
+            start = self.check(int_s, mid)
+            if start >= 0:
+                low = mid + 1
+                ans = s[start:start + mid]
+            else:
+                high = mid - 1
+        return ans
+
+    def check(self, s: list, l: int) -> int:
+        visited = defaultdict(list)
+        MOD = 7 * 10 ** 9
+        h = 0
+        for i in range(l):
+            h = (h * 26 + s[i]) % MOD
+        high = 1
+        for i in range(l - 1):
+            high = (high * 26) % MOD
+        visited[h].append(0)
+        for i in range(1, len(s) - l + 1):
+            h = ((h - s[i - 1] * high) * 26 + s[i + l - 1]) % MOD
+            if h in visited:
+                if any(not any(s[cand + j] != s[i + j] for j in range(l)) for cand in visited[h]):
+                    return i
+            visited[h].append(i)
+        return -1
 
 
 if __name__ == '__main__':
