@@ -972,7 +972,9 @@ class Solution:
                         if i == 0:
                             return step
                         new_waits.add(i)
-                for perv in end2start[end]:
+                perv_list = end2start[end]
+                assert isinstance(perv_list, list)
+                for perv in perv_list:
                     for i in range(perv - 6, perv):
                         if i in visited:
                             continue
@@ -1202,7 +1204,3 @@ class Solution:
                     return i
             visited[h].append(i)
         return -1
-
-
-if __name__ == '__main__':
-    print(list(range(1, 6)))
