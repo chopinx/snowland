@@ -1,4 +1,6 @@
+import random
 import sys
+import time
 from collections import defaultdict, Counter
 from functools import lru_cache
 from typing import List
@@ -335,9 +337,17 @@ class Solution:
         return s[0] == s[-1] and self.isPalindrom(s[1:-1])
 
 
+@lru_cache(None)
+def test(s: str, b: str):
+    return s == b
+
+
 if __name__ == '__main__':
-    a = [[i * 5 + j for j in range(5)] for i in range(5)]
-    print(a)
-    print(a[:][0])
-    print([r[0] for r in a])
-    print(a[0])
+    size = 1000
+    s = "a" * size
+    start_time = time.time()
+    for i in range(1000000):
+        start = random.randint(1, size // 2)
+        end = start + random.randint(1, size // 2)
+        test(s[start:end], s[start:end])
+    print(time.time() - start_time)

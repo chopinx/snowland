@@ -72,3 +72,4 @@ class Seq_DynamicArray(Seq):
         for j in range(i + 1, self.length):
             self.array[j - 1] = self.array[j]
         self.length -= 1
+

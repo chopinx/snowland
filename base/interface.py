@@ -1,4 +1,5 @@
 import abc
+from typing import Any
 
 
 class Seq(abc.ABC):
@@ -82,4 +83,18 @@ class Set(abc.ABC):
     @abc.abstractmethod
     def find_perv(self, key):
         # return the stored item with the largest key smaller than the given key
+        pass
+
+
+class PriorityQueue(object):
+    def build(self):
+        pass
+
+    def insert(self, x):
+        pass
+
+    def delete_max(self) -> Any:
+        pass
+
+    def find_max(self) -> Any:
         pass
