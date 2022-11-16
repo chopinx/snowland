@@ -39,6 +39,10 @@ class Seq(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def len(self):
+        pass
+
+    @abc.abstractmethod
     def delete_at(self, i: int):
         # delete the i th element from the sequence
         pass

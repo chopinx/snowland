@@ -2,6 +2,88 @@ import math
 import time
 
 
+class LinkedList(object):
+    class Node(object):
+        def __init__(self, val, prev=None, next=None):
+            self.val = val
+            self.prev = prev
+            self.next = next
+
+    def __init__(self, A):
+        self.head = None
+        self.tail = None
+        self.len = 0
+        for val in A:
+            self.insert_last(val)
+
+    def insert_first(self, val):
+        new_node = self.Node(val)
+        self.len += 1
+        if self.tail is None:
+            self.head = self.tail = new_node
+            return
+        new_node.next = self.head
+        self.head.prev = new_node
+        self.head = new_node
+
+    def delete_first(self):
+        if self.head is None:
+            raise Exception("list is already empty")
+        self.len -= 1
+        result = self.head.val
+        if self.tail == self.head:
+            self.tail = self.head = None
+            return result
+        self.head = self.head.next
+        self.head.prev = None
+        return result
+
+    def insert_last(self, val):
+        new_node = self.Node(val)
+        self.len += 1
+        if self.tail is None:
+            self.head = self.tail = new_node
+            return
+        self.tail.next = new_node
+        new_node.prev = self.tail
+        self.tail = new_node
+
+    def delete_last(self):
+        if self.tail is None:
+            raise Exception("list is already empty")
+        self.len -= 1
+        result = self.tail.val
+        if self.tail == self.head:
+            self.tail = self.head = None
+            return result
+        self.tail = self.tail.prev
+        self.tail.next = None
+        return result
+
+    def insert_after(self, node, val):
+        if node is None:
+            raise Exception("given node is None")
+        if node == self.tail:
+            self.insert_last(val)
+            return
+        new_node = self.Node(val)
+        new_node.prev, new_node.next = node, node.next
+        node.next = new_node
+        new_node.next.prev = new_node
+        self.len += 1
+
+    def delete_after(self, node):
+        if node is None or node.next is None:
+            raise Exception("given node is None or it has no successor")
+        if node.next == self.tail:
+            return self.delete_last()
+        self.len -= 1
+        result = node.next.val
+        node.next = node.next.next
+        node.next.prev = node
+        return result
+
+
 class TreeNode(object):
     def __init__(self, val, parent=None, left=None, right=None):
         self.val = val
@@ -77,11 +159,28 @@ class TreeNode(object):
 
 
 class AVLTree(TreeNode):
+    def delete_right_leaf(self):
+        if self.right is None or self.right.size > 1:
+            raise Exception("right child is not a leave")
+        self.right = None
+        ancestor = self
+        while ancestor:
+            ancestor.keep_balance()
+            ancestor = ancestor.parent
+
+    def delete_left_leaf(self):
+        if self.left is None or self.left.size > 1:
+            raise Exception("left child is not a leave")
+        self.left = None
+        ancestor = self
+        while ancestor:
+            ancestor.keep_balance()
+            ancestor = ancestor.parent
 
     def add_left_leaf(self, new):
         assert not (self.left and new.left and new.right)
         super().set_left(new)
-        ancestor = self.parent
+        ancestor = self
         while ancestor:
             ancestor.keep_balance()
             ancestor = ancestor.parent
@@ -126,6 +225,10 @@ class AVLTree(TreeNode):
     def add_right_leaf(self, new):
         assert not (self.right and new.left and new.right)
         super().set_right(new)
+        ancestor = self
+        while ancestor:
+            ancestor.keep_balance()
+            ancestor = ancestor.parent
 
     def display(self):
         q = [(self, 0, 0)]
@@ -165,4 +268,4 @@ if __name__ == '__main__':
         # print("------------------add %d, h=%d" % (i + 1, tree.height))
         # tree.display()
         # time.sleep(0.5)
-        print(i, tree.height, tree.height // int(max(1, int(math.log2(i)))), int((time.time() - start)*10000))
+        print(i, tree.height, tree.height // int(max(1, int(math.log2(i)))), int((time.time() - start) * 10000))
