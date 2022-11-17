@@ -82,21 +82,26 @@ class TicTacToe:
 
     def __init__(self, n: int):
         self.n = n
-        self.horizontal, self.vertical, self.diagonal = [[0] * n, [0] * n], [[0] * n, [0] * n], [[0, 0], [0, 0]]
+        self.horizontal, self.vertical, self.diagonal = [
+            [0] * n, [0] * n], [[0] * n, [0] * n], [[0, 0], [0, 0]]
 
     def move(self, row: int, col: int, player: int) -> int:
-        cnt = self.horizontal[player - 1][col] = self.horizontal[player - 1][col] + 1
+        cnt = self.horizontal[player -
+                              1][col] = self.horizontal[player - 1][col] + 1
         if cnt == self.n:
             return player
-        cnt = self.vertical[player - 1][row] = self.vertical[player - 1][row] + 1
+        cnt = self.vertical[player -
+                            1][row] = self.vertical[player - 1][row] + 1
         if cnt == self.n:
             return player
         if row == col:
-            cnt = self.diagonal[player - 1][0] = self.diagonal[player - 1][0] + 1
+            cnt = self.diagonal[player -
+                                1][0] = self.diagonal[player - 1][0] + 1
             if cnt == self.n:
                 return player
         if row + col == self.n - 1:
-            cnt = self.diagonal[player - 1][1] = self.diagonal[player - 1][1] + 1
+            cnt = self.diagonal[player -
+                                1][1] = self.diagonal[player - 1][1] + 1
             if cnt == self.n:
                 return player
         return 0
@@ -251,7 +256,8 @@ class Solution:
         j = 0
         ans = k + 1 + self.racecar(high - target)
         while low - (2 ** j - 1) > 0:
-            ans = min(ans, k - 1 + 1 + j + 1 + self.racecar(target - low + (2 ** j - 1)))
+            ans = min(ans, k - 1 + 1 + j + 1 +
+                      self.racecar(target - low + (2 ** j - 1)))
             j += 1
         return ans
 
@@ -320,7 +326,8 @@ class Solution:
         start = 0
         ans = []
         for i in range(len(searchWord)):
-            start = self.search(products, start, len(products) - 1, searchWord[:i + 1])
+            start = self.search(products, start, len(
+                products) - 1, searchWord[:i + 1])
             ans.append([])
             for j in range(3):
                 if start + j >= len(products):
@@ -503,7 +510,51 @@ class Solution:
                     waits.add((curr, n))
         return -1.0
 
+    # Problem No.1864 Minimum Number of Swaps to Make the Binary String Alternating
+    #
+    # Given a binary string s, return the minimum number of character swaps to make it alternating, or -1 if it is
+    # impossible.
+    #
+    # The string is called alternating if no two adjacent characters are equal. For example, the strings "010" and
+    # "1010" are alternating, while the string "0100" is not.
+    #
+    # Any two characters may be swapped, even if they are not adjacent.
+    #
+    # Example 1:
+    #   Input: s = "111000"
+    #   Output: 1
+    #   Explanation: Swap positions 1 and 4: "111000" -> "101010"
+    #   The string is now alternating.
+    #
+    # Example 2:
+    #   Input: s = "010"
+    #   Output: 0
+    #   Explanation: The string is already alternating, no swaps are needed.
+    #
+    # Example 3:
+    #   Input: s = "1110"
+    #   Output: -1
+    #
+    # Constraints:
+    #   1 <= s.length <= 1000
+    #   s[i] is either '0' or '1'.
+    def minSwaps(self, s: str) -> int:
+        cnt_0, cnt_1 = [0, 0], [0, 0]
+        for i, c in s:
+            if c == '0':
+                cnt_0[i % 2] += 1
+            else:
+                cnt_1[i % 2] += 1
+        if sum(cnt_0) == sum(cnt_1) + 1:
+            return cnt_0[1]
+        elif sum(cnt_1) == sum(cnt_0) + 1:
+            return cnt_1[1]
+        elif sum(cnt_0) == sum(cnt_1):
+            return min(cnt_0)
+        return -1
+
 
 if __name__ == '__main__':
     size = 1000
+    x = 1
     pass
