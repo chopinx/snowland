@@ -154,60 +154,101 @@ class Seq_LinkedList(Seq):
 class Seq_AVLTree(Seq):
 
     def __init__(self, A):
-        self.data = AVLTree(A)
+        self.data = None
+        l = list(A)
+        if len(l) == 0:
+            return
+        if len(l) == 1:
+            self.data = AVLTree(l[0])
+            return
+        mid = len(l) // 2
+        lt = Seq_AVLTree(l[:mid])
+        rt = Seq_AVLTree(l[mid + 1:])
+        self.data = AVLTree(l[mid])
+        self.data.set_left(lt.data)
+        self.data.set_right(rt.data)
+        self.data.keep_balance()
 
     def build(self, A):
         self.__init__(A)
 
-    def get_at(self, i: int):
+    def _get_node_at(self, i: int):
         if i < 0 or i >= self.data.size:
             raise Exception("range index out of bounds")
         node = self.data
         while True:
             if i == 0:
-                return node.subtree_first().val
-            elif i == node.left.size:
-                return node.val
-            elif i < node.left.size:
+                return node.subtree_first()
+            elif node.left and i == node.left.size:
+                return node
+            elif node.left and i < node.left.size:
                 node = node.left
             else:
-                i -= node.left.size + 1
+                i -= (node.left.size if node.left else 0) + 1
                 node = node.right
+
+    def get_at(self, i: int):
+        if i < 0 or i >= self.data.size:
+            raise Exception("range index out of bounds")
+        node = self._get_node_at(i)
+        return node.val
 
     def set_at(self, i: int, x):
         if i < 0 or i >= self.data.size:
             raise Exception("range index out of bounds")
-        node = self.data
-        while True:
-            if i == 0:
-                node.subtree_first().val = x
-                return
-            elif i == node.left.size:
-                node.val = x
-                return
-            elif i < node.left.size:
-                node = node.left
-            else:
-                i -= node.left.size + 1
-                node = node.right
+        node = self._get_node_at(i)
+        node.val = x
 
     def insert_first(self, x):
+        # print("------------------------------------------")
+        if not self.data:
+            self.data = AVLTree(x)
+            return
         self.data.subtree_first().add_left_leaf(AVLTree(x))
 
     def delete_first(self):
-        pass
+        if not self.data:
+            raise Exception("seq is already empty")
+        if self.data.size == 1:
+            self.data = None
+            return
+        return self.data.subtree_first().delete()
 
     def insert_last(self, x):
-        pass
+        if not self.data:
+            self.data = AVLTree(x)
+            return
+        self.data.subtree_last().add_right_leaf(AVLTree(x))
 
     def delete_last(self):
-        pass
+        if not self.data:
+            raise Exception("seq is already empty")
+        if self.data.size == 1:
+            self.data = None
+            return
+        return self.data.subtree_last().delete()
 
     def insert_at(self, i: int, x):
-        pass
+        if i < 0 or i >= self.data.size:
+            raise Exception("range index out of bounds")
+        old_node = self._get_node_at(i)
+        old_val = old_node.val
+        old_node.val = x
+        if old_node.right:
+            old_node.right.subtree_first().add_left_leaf(AVLTree(old_val))
+        else:
+            old_node.add_right_leaf(AVLTree(old_val))
 
     def len(self):
-        pass
+        if self.data:
+            return self.data.size
+        return 0
 
     def delete_at(self, i: int):
-        pass
+        if i < 0 or i >= self.data.size:
+            raise Exception("range index out of bounds")
+        if self.data.size == 1:
+            self.data = None
+            return
+        old_node = self._get_node_at(i)
+        old_node.delete()

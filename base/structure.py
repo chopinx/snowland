@@ -1,4 +1,4 @@
-import math
+import random
 import time
 
 
@@ -93,6 +93,9 @@ class TreeNode(object):
 
         self.height = 0
         self.size = 1
+        self.update_local_attrs1()
+
+    def update_local_attrs1(self):
         self.update_local_attrs()
 
     def subtree_first(self):
@@ -104,13 +107,25 @@ class TreeNode(object):
             return self
         return self.left.subtree_first()
 
+    def subtree_last(self):
+        """
+        find the last node in traversal order of the subtree rooted by current node
+        :return: None
+        """
+        if self.right is None:
+            return self
+        return self.right.subtree_last()
+
     def successor(self):
         """
         find successor in traversal order of current node in tree
         :return: None
         """
         if self.right is None:
-            return self.parent
+            if self.parent and self.parent.left == self:
+                return self.parent
+            else:
+                return None
         return self.right.subtree_first()
 
     def subtree_insert_after(self, new):
@@ -141,11 +156,13 @@ class TreeNode(object):
         update local attributes of current node
         :return: None
         """
-        self.height = 1 + max(self.left.height if self.left is not None else -1,
-                              self.right.height if self.right is not None else -1)
-        self.size = (self.left.size if self.left else 0) + (self.right.size if self.right else 0) + 1
-        if self.parent:
-            self.parent.update_local_attrs()
+        new_h = 1 + max(self.left.height if self.left is not None else -1,
+                        self.right.height if self.right is not None else -1)
+        new_size = (self.left.size if self.left else 0) + (self.right.size if self.right else 0) + 1
+        if new_size != self.size or new_h != self.height:
+            self.size, self.height = new_size, new_h
+            if self.parent:
+                self.parent.update_local_attrs()
 
     def set_right(self, new):
         """
@@ -159,46 +176,62 @@ class TreeNode(object):
 
 
 class AVLTree(TreeNode):
+    def delete(self):
+        """
+        delete current node
+        :return:
+        """
+        # print("delete: %d" % self.val)
+        # self.display()
+        if self.left:
+            prev = self.left.subtree_last()
+            prev.val, self.val = self.val, prev.val
+            return prev.delete()
+        if self.right:
+            successor = self.right.subtree_first()
+            successor.val, self.val = self.val, successor.val
+            return successor.delete()
+        if self.parent:
+            if self.parent.left == self:
+                return self.parent.delete_left_leaf()
+            return self.parent.delete_right_leaf()
+        return self
+
     def delete_right_leaf(self):
         if self.right is None or self.right.size > 1:
             raise Exception("right child is not a leave")
-        self.right = None
-        ancestor = self
-        while ancestor:
-            ancestor.keep_balance()
-            ancestor = ancestor.parent
+        self.set_right(None)
+        self.keep_balance()
 
     def delete_left_leaf(self):
         if self.left is None or self.left.size > 1:
             raise Exception("left child is not a leave")
-        self.left = None
-        ancestor = self
-        while ancestor:
-            ancestor.keep_balance()
-            ancestor = ancestor.parent
+        node = self.left
+        self.set_left(None)
+        self.keep_balance()
+        return node
 
     def add_left_leaf(self, new):
+        # print("add_left_leaf, self=%d, new=%s" % (self.val, new.val))
         assert not (self.left and new.left and new.right)
         super().set_left(new)
-        ancestor = self
-        while ancestor:
-            ancestor.keep_balance()
-            ancestor = ancestor.parent
+        self.keep_balance()
 
     def keep_balance(self):
+        node = self
         if self.height_diff() < -1:
-            self.left_rotate()
+            node = self.left_rotate()
         elif self.height_diff() > 1:
-            self.right_rotate()
-        if self.parent:
-            self.parent.keep_balance()
+            node = self.right_rotate()
+        if node.parent:
+            node.parent.keep_balance()
 
     def height_diff(self):
         return (self.left.height if self.left else -1) - (self.right.height if self.right else -1)
 
     def left_rotate(self):
         if not self.right:
-            return
+            return self
         if self.right.height_diff() > 0:
             # have to right rotate the right child first
             self.right.right_rotate()
@@ -208,10 +241,13 @@ class AVLTree(TreeNode):
         ns[1].set_right(ns[4])
         ns[2].set_left(ns[0])
         ns[2].set_right(ns[3])
+        # print("left_rotate: %d" % self.val)
+        # self.display()
+        return self
 
     def right_rotate(self):
         if not self.left:
-            return
+            return self
         if self.left.height_diff() > 0:
             # have to left rotate the left child first
             self.left.left_rotate()
@@ -221,14 +257,15 @@ class AVLTree(TreeNode):
         ns[1].set_left(ns[4])
         ns[2].set_right(ns[0])
         ns[2].set_left(ns[3])
+        # print("right_rotate: %d" % self.val)
+        # self.display()
+        return self
 
     def add_right_leaf(self, new):
+        # print("add_right_leaf, self=%d, new=%s" % (self.val, new.val))
         assert not (self.right and new.left and new.right)
         super().set_right(new)
-        ancestor = self
-        while ancestor:
-            ancestor.keep_balance()
-            ancestor = ancestor.parent
+        self.keep_balance()
 
     def display(self):
         q = [(self, 0, 0)]
@@ -259,13 +296,48 @@ class AVLTree(TreeNode):
                 q.append((None, depth + 1, level_order[depth]))
             level_order[depth] += 1
 
+    def check(self):
+        assert -1 <= self.height_diff() <= 1
+        size, height = 1, 0
+        if self.left:
+            size += self.left.size
+            height = max(height, self.left.height + 1)
+            assert self.left.val <= self.val
+            assert self.left.parent == self
+            self.left.check()
+        if self.right:
+            size += self.right.size
+            height = max(height, self.right.height + 1)
+            assert self.right.val >= self.val
+            assert self.right.parent == self
+            self.right.check()
+        assert size == self.size
+        assert height == self.height
+
 
 if __name__ == '__main__':
-    tree = AVLTree(0)
+    last_node = tree = AVLTree(50)
+    deleted = set()
+    min_val, max_val = 50, 50
     for i in range(1, 100000):
         start = time.time()
-        tree.subtree_first().add_left_leaf(AVLTree(i + 1))
-        # print("------------------add %d, h=%d" % (i + 1, tree.height))
-        # tree.display()
-        # time.sleep(0.5)
-        print(i, tree.height, tree.height // int(max(1, int(math.log2(i)))), int((time.time() - start) * 10000))
+        if random.randint(0, 1) == 0:
+            min_val -= 1
+            new_node = AVLTree(min_val)
+            tree.subtree_first().add_left_leaf(new_node)
+        else:
+            max_val += 1
+            new_node = AVLTree(max_val)
+            tree.subtree_last().add_right_leaf(new_node)
+        # print("------------------add %d, size=%d, deleted=%d, h=%d" % (i + 1, tree.size, len(deleted), tree.height))
+        tree.display()
+        # tree.check()
+        if random.randint(0, 10) % 5 == 0:
+            if last_node not in deleted:
+                deleted.add(last_node.delete())
+            last_node = new_node
+            # print("------------------add %d, size=%d, deleted=%d, h=%d" % (i + 1, tree.size, len(deleted), tree.height))
+            tree.display()
+            # tree.check()
+        time.sleep(0.5)
+        # print(i, tree.height, tree.height // int(max(1, int(math.log2(i)))), int((time.time() - start) * 10000))
