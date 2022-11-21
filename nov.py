@@ -558,8 +558,8 @@ class Solution:
     # There is a long table with a line of plates and candles arranged on top of it. You are given a 0-indexed string s
     # consisting of characters '*' and '|' only, where a '*' represents a plate and a '|' represents a candle.
     #
-    # You are also given a 0-indexed 2D integer array queries where queries[i] = [lefti, righti] denotes the substring
-    # s[lefti...righti] (inclusive). For each query, you need to find the number of plates between candles that are in
+    # You are also given a 0-indexed 2D integer array queries where queries[i] = [left_i, right_i] denotes the substring
+    # s[left_i...right_i] (inclusive). For each query, you need to find the number of plates between candles that are in
     # the substring. A plate is considered between candles if there is at least one candle to its left and at least one
     # candle to its right in the substring.
     #
@@ -589,7 +589,7 @@ class Solution:
     #   s consists of '*' and '|' characters.
     #   1 <= queries.length <= 105
     #   queries[i].length == 2
-    #   0 <= lefti <= righti < s.length
+    #   0 <= left_i <= right_i < s.length
     def platesBetweenCandles(self, s: str, queries: List[List[int]]) -> List[int]:
         left_cnt = [0] * len(s)
         plates_cnt = 0
