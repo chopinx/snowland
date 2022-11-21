@@ -19,3 +19,5 @@
 # vendor/
 
 /go.sum
+
+*.pyc
