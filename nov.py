@@ -637,7 +637,7 @@ class Solution:
     #   On round 3, use your armor to protect you from 4 damage. You have 4 - 0 = 4 health.
     #   On round 4, take 3 damage. You have 4 - 3 = 1 health.
     #   Note that 13 is the minimum health you need to start with to beat the game.
-    # 
+    #
     # Example 2:
     #   Input: damage = [2,5,3,4], armor = 7
     #   Output: 10
@@ -647,7 +647,7 @@ class Solution:
     #   On round 3, take 3 damage. You have 8 - 3 = 5 health.
     #   On round 4, take 4 damage. You have 5 - 4 = 1 health.
     #   Note that 10 is the minimum health you need to start with to beat the game.
-    # 
+    #
     # Example 3:
     #   Input: damage = [3,3,3], armor = 0
     #   Output: 10
@@ -663,10 +663,11 @@ class Solution:
     #   0 <= damage[i] <= 10^5
     #   0 <= armor <= 10^5
     def minimumHealth(self, damage: List[int], armor: int) -> int:
-        left_damage, ds = [0] * len(damage), 0 
+        left_damage, ds = [0] * len(damage), 0
         for i in range(len(damage)):
             ds += damage[-i-1]
             left_damage[-i-1] = ds
+
         @lru_cache(None)
         def dp(start: int, a: int):
             if a == 0:
@@ -677,8 +678,50 @@ class Solution:
         return dp(0, armor)
 
     def minimumHealth2(self, damage: List[int], armor: int) -> int:
-        return sum(damage) + 1 - min(armor, max(damage)) 
- 
+        return sum(damage) + 1 - min(armor, max(damage))
+
+    # Problem No.2222 Number of Ways to Select Buildings
+    #
+    # You are given a 0-indexed binary string s which represents the types of buildings along a street where:
+    #
+    # s[i] = '0' denotes that the ith building is an office and
+    # s[i] = '1' denotes that the ith building is a restaurant.
+    # As a city official, you would like to select 3 buildings for random inspection. However, to ensure variety, no two
+    # consecutive buildings out of the selected buildings can be of the same type.
+    #
+    # For example, given s = "001101", we cannot select the 1st, 3rd, and 5th buildings as that would form "011" which
+    # is not allowed due to having two consecutive buildings of the same type.
+    # Return the number of valid ways to select 3 buildings.
+    #
+    # Example 1:
+    #   Input: s = "001101"
+    #   Output: 6
+    #   Explanation:
+    #   The following sets of indices selected are valid:
+    #   - [0,2,4] from "001101" forms "010"
+    #   - [0,3,4] from "001101" forms "010"
+    #   - [1,2,4] from "001101" forms "010"
+    #   - [1,3,4] from "001101" forms "010"
+    #   - [2,4,5] from "001101" forms "101"
+    #   - [3,4,5] from "001101" forms "101"
+    #   No other selection is valid. Thus, there are 6 total ways.
+    #
+    # Example 2:
+    #   Input: s = "11100"
+    #   Output: 0
+    #   Explanation: It can be shown that there are no valid selections.
+    #
+    # Constraints:
+    #   3 <= s.length <= 105
+    #   s[i] is either '0' or '1'.
+    def numberOfWays(self, s: str) -> int:
+        dp = [1, 0, 0, 0, 0, 0]
+        for c in s:
+            if c == '0':
+                dp[1], dp[4], dp[5] = dp[1] + 1, dp[4] + dp[2], dp[3] + dp[5]
+            else:
+                dp[2], dp[3], dp[5] = dp[2] + 1, dp[1] + dp[3], dp[4] + dp[5]
+        return dp[5]
 
 
 if __name__ == '__main__':
