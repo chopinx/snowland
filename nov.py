@@ -87,11 +87,10 @@ class SORTracker:
 
     def add(self, name: str, score: int) -> None:
         new_loc = (0-score, name)
-        if len(self.b_heap) > 0:
-            if new_loc <  self.b_heap[0].loc:
-                heapq.heappush(self.a_heap, heapq.heappop(self.b_heap).loc)
-                heapq.heappush(self.b_heap, self.BackLoc(new_loc))
-                return
+        if len(self.b_heap) > 0 and new_loc <  self.b_heap[0].loc:
+            heapq.heappush(self.a_heap, heapq.heappop(self.b_heap).loc)
+            heapq.heappush(self.b_heap, self.BackLoc(new_loc))
+            return
         heapq.heappush(self.a_heap, new_loc)
 
     def get(self) -> str:
