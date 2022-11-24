@@ -765,6 +765,96 @@ class Solution:
             ans += sub_sum
         return ans
 
+    # Problem No.2355 Maximum Number of Books You Can Take
+    #
+    # You are given a 0-indexed integer array books of length n where books[i] denotes the number of books on the ith
+    # shelf of a bookshelf.
+    #
+    # You are going to take books from a contiguous section of the bookshelf spanning from l to r where 0 <= l <= r < n.
+    #  For each index i in the range l <= i < r, you must take strictly fewer books from shelf i than shelf i + 1.
+    #
+    # Return the maximum number of books you can take from the bookshelf.
+    #
+    # Example 1:
+    #   Input: books = [8,5,2,7,9]
+    #   Output: 19
+    #   Explanation:
+    #   - Take 1 book from shelf 1.
+    #   - Take 2 books from shelf 2.
+    #   - Take 7 books from shelf 3.
+    #   - Take 9 books from shelf 4.
+    #   You have taken 19 books, so return 19.
+    #   It can be proven that 19 is the maximum number of books you can take.
+    #
+    # Example 2:
+    #   Input: books = [7,0,3,4,5]
+    #   Output: 12
+    #   Explanation:
+    #   - Take 3 books from shelf 2.
+    #   - Take 4 books from shelf 3.
+    #   - Take 5 books from shelf 4.
+    #   You have taken 12 books so return 12.
+    #   It can be proven that 12 is the maximum number of books you can take.
+    #
+    # Example 3:
+    #   Input: books = [8,2,3,7,3,4,0,1,4,3]
+    #   Output: 13
+    #   Explanation:
+    #   - Take 1 book from shelf 0.
+    #   - Take 2 books from shelf 1.
+    #   - Take 3 books from shelf 2.
+    #   - Take 7 books from shelf 3.
+    #   You have taken 13 books so return 13.
+    #   It can be proven that 13 is the maximum number of books you can take.
+    #
+    # Constraints:
+    #   1 <= books.length <= 10^5
+    #   0 <= books[i] <= 10^5
+
+    def maximumBooks(self, books: List[int]) -> int:
+        # print()
+        taken = []
+        taken_sum = [0] * len(books)
+        ans = 0
+        for i, book in enumerate(books):
+            if book == 0:
+                taken = []
+                taken_sum[i] = 0
+            elif len(taken) == 0 or book > taken[-1][1]:
+                taken_sum[i] = taken_sum[i-1] + book
+                taken.append((i, book))
+            else:
+                taken_i = self.find_first_gt(taken, book-i)
+                first_gt = taken[taken_i][0]
+                if book - i + first_gt > 0:
+                    before = taken_sum[first_gt-1] if first_gt > 0 else 0
+                    after = (book + (book - i + first_gt)) * (i - first_gt + 1) // 2
+                    taken = taken[:taken_i] + [(first_gt, book - i + first_gt), (i, book)]
+                else:
+                    before = 0
+                    after = book * (book+1) // 2
+                    taken = [(i, book)]
+                    if book > 1 and i-book+1 >= 0:
+                        taken = [(i-book+1, 1), (i, book)]
+                taken_sum[i] = before + after
+            ans = max(ans, taken_sum[i])
+        return ans
+
+    def find_first_gt(self, taken, target):
+        if len(taken) == 0:
+            return -1
+        if len(taken) <= 2:
+            for i, (b_i, book) in enumerate(taken):
+                if book-b_i > target:
+                    return i
+            return -1
+        mid = len(taken) // 2
+        mid_i, mid_book = taken[mid]
+        if mid_book - mid_i <= target:
+            return mid + self.find_first_gt(taken[mid:], target)
+        else:
+            return self.find_first_gt(taken[:mid+1], target)
+
 
 if __name__ == '__main__':
     size = 1000
