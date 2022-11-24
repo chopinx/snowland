@@ -908,6 +908,36 @@ class Solution:
     #   0 <= books[i] <= 10^5
 
     def maximumBooks(self, books: List[int]) -> int:
+        stack = []
+        dp = [0] * len(books)
+        ans = 0
+        for i, b in enumerate(books):
+            if i > 0 and b > books[i-1]:
+                dp[i] = dp[i - 1] + b
+                if b - books[i-1] > 1:
+                    stack.append(i-1)
+            else:
+                while len(stack) > 0 and books[stack[-1]] >= b - (i - stack[-1]) > 0:
+                    stack.pop()
+                if b == 0:
+                    stack = []
+                    dp[i] = 0
+                elif len(stack) == 0:
+                    if b - i < 1:
+                        dp[i] = b * (b+1) //2
+                    else:
+                        dp[i] = (b + b - i) * (i+1) // 2
+                elif b - (i - stack[-1]) <= 0:
+                    dp[i] = b * (b+1) //2
+                    stack=[]
+                else: 
+                    dp[i] = dp[stack[-1]] + (b + b - (i - stack[-1] - 1)) * (i - stack[-1]) // 2
+            if dp[i] > ans:
+                ans = dp[i]
+        return ans
+
+
+    def maximumBooks(self, books: List[int]) -> int:
         # print()
         taken = []
         taken_sum = [0] * len(books)
