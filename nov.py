@@ -4,7 +4,7 @@ import sys
 from collections import defaultdict, Counter
 from functools import lru_cache
 from typing import List
-
+from sortedcontainers import SortedDict
 
 # Problem No.2102 Sequentially Ordinal Rank Tracker
 #
@@ -982,6 +982,95 @@ class Solution:
             return mid + self.find_first_gt(taken[mid:], target)
         else:
             return self.find_first_gt(taken[:mid+1], target)
+
+
+    # Problem No.2104 Sum of Subarray Ranges
+    # 
+    # You are given an integer array nums. The range of a subarray of nums is the difference between the largest and 
+    # smallest element in the subarray.
+    # 
+    # Return the sum of all subarray ranges of nums.
+    # 
+    # A subarray is a contiguous non-empty sequence of elements within an array.
+    # 
+    # Example 1:
+    #   Input: nums = [1,2,3]
+    #   Output: 4
+    #   Explanation: The 6 subarrays of nums are the following:
+    #   [1], range = largest - smallest = 1 - 1 = 0 
+    #   [2], range = 2 - 2 = 0
+    #   [3], range = 3 - 3 = 0
+    #   [1,2], range = 2 - 1 = 1
+    #   [2,3], range = 3 - 2 = 1
+    #   [1,2,3], range = 3 - 1 = 2
+    #   So the sum of all ranges is 0 + 0 + 0 + 1 + 1 + 2 = 4.
+    # 
+    # Example 2:
+    #   Input: nums = [1,3,3]
+    #   Output: 4
+    #   Explanation: The 6 subarrays of nums are the following:
+    #   [1], range = largest - smallest = 1 - 1 = 0
+    #   [3], range = 3 - 3 = 0
+    #   [3], range = 3 - 3 = 0
+    #   [1,3], range = 3 - 1 = 2
+    #   [3,3], range = 3 - 3 = 0
+    #   [1,3,3], range = 3 - 1 = 2
+    #   So the sum of all ranges is 0 + 0 + 0 + 2 + 0 + 2 = 4.
+    # 
+    # Example 3:
+    #   Input: nums = [4,-2,-3,4,1]
+    #   Output: 59
+    #   Explanation: The sum of all subarray ranges of nums is 59.
+    # 
+    # Constraints:
+    #   1 <= nums.length <= 1000
+    #   -10^9 <= nums[i] <= 10^9
+    # 
+    # Follow-up: Could you find a solution with O(n) time complexity?
+    
+    def subArrayRanges(self, nums: List[int]) -> int:
+        if len(nums) == 1:
+            return 0
+        dp = [0, abs(nums[1] - nums[0])] + [0] * (len(nums)-2)
+        for i in range(2, len(nums)):
+            if nums[i] == nums[i-1]:
+                dp[i] = dp[i-1]
+                continue
+            j = i - 1
+            diff = 0
+            min_j, max_j = nums[j], nums[j]
+            diff_j, last_diff = nums[i] - nums[j],nums[i] - nums[i-1] 
+            while j >= 0 and diff_j* last_diff >= 0:
+                diff_j, last_diff = nums[i] - nums[j],nums[i] - nums[i-1] 
+                if diff_j * last_diff > (nums[i] - min_j) * last_diff:
+                    min_j = nums[j]
+                if diff_j* last_diff < (nums[i] - max_j) * last_diff:
+                    max_j = nums[j]
+                diff += (nums[i] - min_j) - (max_j - min_j)
+                j -= 1
+            dp[i] = dp[i-1] + abs(diff)
+        return sum(dp)
+
+    def subArrayRanges2(self, nums: List[int]) -> int:
+        dp = [0] * len(nums)
+        upper, lower = [0],[0] 
+        for i in range(1, len(nums)):
+            n = nums[i]
+            if n >= nums[i-1]:
+                while len(upper)>0 and nums[upper[-1]] <= n:
+                    prev_i = upper.pop() 
+                    prev_prev_i = upper[-1] if len(upper) > 0 else -1
+                    dp[i] += (n - nums[prev_i]) * (prev_i - prev_prev_i)
+            else:
+                while len(lower)>0 and nums[lower[-1]] >= n:
+                    prev_i = lower.pop() 
+                    prev_prev_i = lower[-1] if len(lower) > 0 else -1
+                    dp[i] += (nums[prev_i] - n) * (prev_i - prev_prev_i)
+            dp[i] += dp[i-1]
+            upper.append(i)
+            lower.append(i)
+        return sum(dp)
+            
 
 
 if __name__ == '__main__':
