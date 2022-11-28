@@ -3,6 +3,7 @@ import queue
 import sys
 from collections import defaultdict, Counter
 from functools import lru_cache
+import time
 from typing import List
 from sortedcontainers import SortedDict
 
@@ -68,6 +69,8 @@ from sortedcontainers import SortedDict
 #   1 <= score <= 10^5
 #   At any time, the number of calls to get does not exceed the number of calls to add.
 #   At most 4 * 104 calls in total will be made to add and get.
+
+
 class SORTracker:
     # Your SORTracker object will be instantiated and called as such:
     # obj = SORTracker()
@@ -80,14 +83,13 @@ class SORTracker:
         def __le__(self, other):
             return self.loc > other.loc
 
-
     def __init__(self):
         self.a_heap = []
         self.b_heap = []
 
     def add(self, name: str, score: int) -> None:
         new_loc = (0-score, name)
-        if len(self.b_heap) > 0 and new_loc <  self.b_heap[0].loc:
+        if len(self.b_heap) > 0 and new_loc < self.b_heap[0].loc:
             heapq.heappush(self.a_heap, heapq.heappop(self.b_heap).loc)
             heapq.heappush(self.b_heap, self.BackLoc(new_loc))
             return
@@ -98,7 +100,6 @@ class SORTracker:
         heapq.heappush(self.b_heap, self.BackLoc(curr))
         return curr[1]
 
-    
 
 # Problem No.348 Design Tic-Tac-Toe
 #
@@ -924,18 +925,18 @@ class Solution:
                     dp[i] = 0
                 elif len(stack) == 0:
                     if b - i < 1:
-                        dp[i] = b * (b+1) //2
+                        dp[i] = b * (b+1) // 2
                     else:
                         dp[i] = (b + b - i) * (i+1) // 2
                 elif b - (i - stack[-1]) <= 0:
-                    dp[i] = b * (b+1) //2
-                    stack=[]
-                else: 
-                    dp[i] = dp[stack[-1]] + (b + b - (i - stack[-1] - 1)) * (i - stack[-1]) // 2
+                    dp[i] = b * (b+1) // 2
+                    stack = []
+                else:
+                    dp[i] = dp[stack[-1]] + \
+                        (b + b - (i - stack[-1] - 1)) * (i - stack[-1]) // 2
             if dp[i] > ans:
                 ans = dp[i]
         return ans
-
 
     def maximumBooks(self, books: List[int]) -> int:
         # print()
@@ -983,28 +984,27 @@ class Solution:
         else:
             return self.find_first_gt(taken[:mid+1], target)
 
-
     # Problem No.2104 Sum of Subarray Ranges
-    # 
-    # You are given an integer array nums. The range of a subarray of nums is the difference between the largest and 
+    #
+    # You are given an integer array nums. The range of a subarray of nums is the difference between the largest and
     # smallest element in the subarray.
-    # 
+    #
     # Return the sum of all subarray ranges of nums.
-    # 
+    #
     # A subarray is a contiguous non-empty sequence of elements within an array.
-    # 
+    #
     # Example 1:
     #   Input: nums = [1,2,3]
     #   Output: 4
     #   Explanation: The 6 subarrays of nums are the following:
-    #   [1], range = largest - smallest = 1 - 1 = 0 
+    #   [1], range = largest - smallest = 1 - 1 = 0
     #   [2], range = 2 - 2 = 0
     #   [3], range = 3 - 3 = 0
     #   [1,2], range = 2 - 1 = 1
     #   [2,3], range = 3 - 2 = 1
     #   [1,2,3], range = 3 - 1 = 2
     #   So the sum of all ranges is 0 + 0 + 0 + 1 + 1 + 2 = 4.
-    # 
+    #
     # Example 2:
     #   Input: nums = [1,3,3]
     #   Output: 4
@@ -1016,18 +1016,18 @@ class Solution:
     #   [3,3], range = 3 - 3 = 0
     #   [1,3,3], range = 3 - 1 = 2
     #   So the sum of all ranges is 0 + 0 + 0 + 2 + 0 + 2 = 4.
-    # 
+    #
     # Example 3:
     #   Input: nums = [4,-2,-3,4,1]
     #   Output: 59
     #   Explanation: The sum of all subarray ranges of nums is 59.
-    # 
+    #
     # Constraints:
     #   1 <= nums.length <= 1000
     #   -10^9 <= nums[i] <= 10^9
-    # 
+    #
     # Follow-up: Could you find a solution with O(n) time complexity?
-    
+
     def subArrayRanges(self, nums: List[int]) -> int:
         if len(nums) == 1:
             return 0
@@ -1039,12 +1039,12 @@ class Solution:
             j = i - 1
             diff = 0
             min_j, max_j = nums[j], nums[j]
-            diff_j, last_diff = nums[i] - nums[j],nums[i] - nums[i-1] 
-            while j >= 0 and diff_j* last_diff >= 0:
-                diff_j, last_diff = nums[i] - nums[j],nums[i] - nums[i-1] 
+            diff_j, last_diff = nums[i] - nums[j], nums[i] - nums[i-1]
+            while j >= 0 and diff_j * last_diff >= 0:
+                diff_j, last_diff = nums[i] - nums[j], nums[i] - nums[i-1]
                 if diff_j * last_diff > (nums[i] - min_j) * last_diff:
                     min_j = nums[j]
-                if diff_j* last_diff < (nums[i] - max_j) * last_diff:
+                if diff_j * last_diff < (nums[i] - max_j) * last_diff:
                     max_j = nums[j]
                 diff += (nums[i] - min_j) - (max_j - min_j)
                 j -= 1
@@ -1053,17 +1053,17 @@ class Solution:
 
     def subArrayRanges2(self, nums: List[int]) -> int:
         dp = [0] * len(nums)
-        upper, lower = [0],[0] 
+        upper, lower = [0], [0]
         for i in range(1, len(nums)):
             n = nums[i]
             if n >= nums[i-1]:
-                while len(upper)>0 and nums[upper[-1]] <= n:
-                    prev_i = upper.pop() 
+                while len(upper) > 0 and nums[upper[-1]] <= n:
+                    prev_i = upper.pop()
                     prev_prev_i = upper[-1] if len(upper) > 0 else -1
                     dp[i] += (n - nums[prev_i]) * (prev_i - prev_prev_i)
             else:
-                while len(lower)>0 and nums[lower[-1]] >= n:
-                    prev_i = lower.pop() 
+                while len(lower) > 0 and nums[lower[-1]] >= n:
+                    prev_i = lower.pop()
                     prev_prev_i = lower[-1] if len(lower) > 0 else -1
                     dp[i] += (nums[prev_i] - n) * (prev_i - prev_prev_i)
             dp[i] += dp[i-1]
@@ -1074,22 +1074,22 @@ class Solution:
     # Problem No.2193 Minimum Number of Moves to Make Palindrome
     #
     # You are given a string s consisting only of lowercase English letters.
-    # 
+    #
     # In one move, you can select any two adjacent characters of s and swap them.
-    # 
+    #
     # Return the minimum number of moves needed to make s a palindrome.
-    # 
+    #
     # Note that the input will be generated such that s can always be converted to a palindrome.
-    # 
+    #
     # Example 1:
     #   Input: s = "aabb"
     #   Output: 2
     #   Explanation:
-    #   We can obtain two palindromes from s, "abba" and "baab". 
+    #   We can obtain two palindromes from s, "abba" and "baab".
     #   - We can obtain "abba" from s in 2 moves: "aabb" -> "abab" -> "abba".
     #   - We can obtain "baab" from s in 2 moves: "aabb" -> "abab" -> "baab".
     #   Thus, the minimum number of moves needed to make s a palindrome is 2.
-    # 
+    #
     # Example 2:
     #   Input: s = "letelt"
     #   Output: 2
@@ -1098,7 +1098,7 @@ class Solution:
     #   One of the ways we can obtain it is "letelt" -> "letetl" -> "lettel".
     #   Other palindromes such as "tleelt" can also be obtained in 2 moves.
     #   It can be shown that it is not possible to obtain a palindrome in less than 2 moves.
-    # 
+    #
     # Constraints:
     #   1 <= s.length <= 2000
     #   s consists only of lowercase English letters.
@@ -1114,32 +1114,32 @@ class Solution:
                 ans += i
                 s.pop(i)
             s.pop()
-        return ans     
+        return ans
 
     # Problem No.2488 Count Subarrays With Median K
-    # 
-    # You are given an array nums of size n consisting of distinct integers from 1 to n and a positive 
+    #
+    # You are given an array nums of size n consisting of distinct integers from 1 to n and a positive
     # integer k.
-    # 
+    #
     # Return the number of non-empty subarrays in nums that have a median equal to k.
-    # 
+    #
     # Note:
-    # 
-    # The median of an array is the middle element after sorting the array in ascending order. If the array 
+    #
+    # The median of an array is the middle element after sorting the array in ascending order. If the array
     # is of even length, the median is the left middle element.
     # For example, the median of [2,3,1,4] is 2, and the median of [8,4,3,5,1] is 4.
     # A subarray is a contiguous part of an array.
-    # 
+    #
     # Example 1:
     #   Input: nums = [3,2,1,4,5], k = 4
     #   Output: 3
     #   Explanation: The subarrays that have a median equal to 4 are: [4], [4,5] and [1,4,5].
-    # 
+    #
     # Example 2:
     #   Input: nums = [2,3,1], k = 3
     #   Output: 1
     #   Explanation: [3] is the only subarray that has a median equal to 3.
-    # 
+    #
     # Constraints:
     #   n == nums.length
     #   1 <= n <= 105
@@ -1147,7 +1147,7 @@ class Solution:
     #   The integers in nums are distinct.
     def countSubarrays(self, nums: List[int], k: int) -> int:
         k_idx = nums.index(k)
-        l_cnt = {0:1}
+        l_cnt = {0: 1}
         diff = ans = 0
         for i in range(k_idx-1, -1, -1):
             diff += 1 if nums[i] < k else -1
@@ -1162,12 +1162,54 @@ class Solution:
                 ans += l_cnt.get(ac_diff - diff, 0)
         return ans
 
+    # Problem No.2221 Find Triangular Sum of an Array
+    #
+    # You are given a 0-indexed integer array nums, where nums[i] is a digit between 0 and 9 (inclusive).
+    #
+    # The triangular sum of nums is the value of the only element present in nums after the following process terminates:
+    #
+    # Let nums comprise of n elements. If n == 1, end the process. Otherwise, create a new 0-indexed integer array
+    # newNums of length n - 1.
+    # For each index i, where 0 <= i < n - 1, assign the value of newNums[i] as (nums[i] + nums[i+1]) % 10, where %
+    # denotes modulo operator.
+    # Replace the array nums with newNums.
+    # Repeat the entire process starting from step 1.
+    # Return the triangular sum of nums.
+    #
+    # Example 1:
+    #   Input: nums = [1,2,3,4,5]
+    #   Output: 8
+    #   Explanation:
+    #   The above diagram depicts the process from which we obtain the triangular sum of the array.
+    #
+    # Example 2:
+    #   Input: nums = [5]
+    #   Output: 5
+    #   Explanation:
+    #   Since there is only one element in nums, the triangular sum is the value of that element itself.
+    #
+    # Constraints:
+    #   1 <= nums.length <= 1000
+    #   0 <= nums[i] <= 9
+
+    def triangularSum(self, nums: List[int]) -> int:
+        mCk, m, ans = 1, len(nums)-1, 0
+        for i, num in enumerate(nums):
+            ans = (ans + num * mCk) % 10
+            mCk = mCk * (m-i) // (i+1)
+        return ans
+
 
 if __name__ == '__main__':
-    a = SORTracker.Location("bradford", 2)
-    b = SORTracker.Location("bradford", 3)
-    q = queue.PriorityQueue()
-    q.put((a,"a"))
-    q.put((b,"b"))
-    SORTracker().display(q)
-    SORTracker().display(q)
+    s = 'abcdefghijklmnopqrstuvwxyz'
+    for i in range(1, 27):
+        ss = list(s[:i])
+        while len(ss) > 1:
+            for j in range(1, len(ss)):
+                ss[j-1] = ss[j-1] + ss[j]
+            ss = ss[:-1]
+        print(i)
+        for j in range(i):
+            print(ss[0].count(s[j]), end=" ")
+        print()
+        time.sleep(1)
