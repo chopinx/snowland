@@ -1292,9 +1292,9 @@ class Solution:
         return ans
 
     def largestAB(self, s: str, a_idx: list, b_idx: list) -> int:
-        ans, a, b, high = 0, 0, 0, min(a_idx[0], b_idx[0])
+        ans, a, b,= 0, 0, 0
         a_cnt, b_cnt = 0, 0
-        while high < len(s):
+        while min(a_idx[a], b_idx[b]) < len(s):
             if a_idx[a] < b_idx[b]:
                 a_cnt += 1
                 a += 1
@@ -1303,7 +1303,6 @@ class Solution:
                 b += 1
             if a_cnt < b_cnt:
                 a_cnt, b_cnt = 0, 0
-            high = min(a_idx[a], b_idx[b])
             ans = max(ans, a_cnt - b_cnt if b_cnt > 0 else a_cnt - 1)
         return ans
 
