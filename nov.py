@@ -1,4 +1,5 @@
 import heapq
+from math import inf
 import queue
 import sys
 from collections import defaultdict, Counter
@@ -1201,19 +1202,19 @@ class Solution:
 
     # Problem No.2268 Minimum Number of Keypresses
     #
-    # You have a keypad with 9 buttons, numbered from 1 to 9, each mapped to lowercase English letters. You can choose 
+    # You have a keypad with 9 buttons, numbered from 1 to 9, each mapped to lowercase English letters. You can choose
     # which characters each button is matched to as long as:
-    # 
+    #
     # All 26 lowercase English letters are mapped to.
     # Each character is mapped to by exactly 1 button.
     # Each button maps to at most 3 characters.
-    # To type the first character matched to a button, you press the button once. To type the second character, you 
+    # To type the first character matched to a button, you press the button once. To type the second character, you
     # press the button twice, and so on.
-    # 
+    #
     # Given a string s, return the minimum number of keypresses needed to type s using your keypad.
-    # 
+    #
     # Note that the characters mapped to by each button, and the order they are mapped in cannot be changed.
-    # 
+    #
     # Example 1:
     #   Input: s = "apple"
     #   Output: 5
@@ -1234,7 +1235,7 @@ class Solution:
     #   Type 'k' by pressing button 2 twice.
     #   Type 'l' by pressing button 3 twice.
     #   A total of 15 button presses are needed, so return 15.
-    # 
+    #
     # Constraints:
     #   1 <= s.length <= 10^5
     #   s consists of lowercase English letters.
@@ -1244,16 +1245,72 @@ class Solution:
             ans += cnt * (i // 9 + 1)
         return ans
 
+    # Problem No.2272 Substring With Largest Variance
+    #
+    # The variance of a string is defined as the largest difference between the number of occurrences of any 2 characters
+    # present in the string. Note the two characters may or may not be the same.
+    #
+    # Given a string s consisting of lowercase English letters only, return the largest variance possible among all
+    # substrings of s.
+    #
+    # A substring is a contiguous sequence of characters within a string.
+    #
+    # Example 1:
+    #    Input: s = "aababbb"
+    #    Output: 3
+    #    Explanation:
+    #    All possible variances along with their respective substrings are listed below:
+    #    - Variance 0 for substrings "a", "aa", "ab", "abab", "aababb", "ba", "b", "bb", and "bbb".
+    #    - Variance 1 for substrings "aab", "aba", "abb", "aabab", "ababb", "aababbb", and "bab".
+    #    - Variance 2 for substrings "aaba", "ababbb", "abbb", and "babb".
+    #    - Variance 3 for substring "babbb".
+    #    Since the largest possible variance is 3, we return it.
+    #
+    # Example 2:
+    #    Input: s = "abcde"
+    #    Output: 0
+    #    Explanation:
+    #    No letter occurs more than once in s, so the variance of every substring is 0.
+    #
+    # Constraints:
+    #    1 <= s.length <= 10^4
+    #    s consists of lowercase English letters.
+    def largestVariance(self, s: str) -> int:
+        ans = 0
+        c_idx = defaultdict(list)
+        for i, c in enumerate(s):
+            c_idx[c].append(i)
+        for c in c_idx.keys():
+            c_idx[c].append(len(s))
+        for a in c_idx.keys():
+            if len(c_idx[a])-1 <= ans:
+                continue
+            for b in c_idx.keys():
+                if a == b:
+                    continue
+                ans = max(ans, self.largestAB(s, c_idx[a], c_idx[b]))
+        return ans
+
+    def largestAB(self, s: str, a_idx: list, b_idx: list) -> int:
+        ans, a, b, high = 0, 0, 0, min(a_idx[0], b_idx[0])
+        a_cnt, b_cnt = 0, 0
+        while high < len(s):
+            if a_idx[a] < b_idx[b]:
+                a_cnt += 1
+                a += 1
+            else:
+                b_cnt += 1
+                b += 1
+            if a_cnt < b_cnt:
+                a_cnt, b_cnt = 0, 0
+            high = min(a_idx[a], b_idx[b])
+            ans = max(ans, a_cnt - b_cnt if b_cnt > 0 else a_cnt - 1)
+        return ans
+
+
 if __name__ == '__main__':
-    s = 'abcdefghijklmnopqrstuvwxyz'
-    for i in range(1, 27):
-        ss = list(s[:i])
-        while len(ss) > 1:
-            for j in range(1, len(ss)):
-                ss[j-1] = ss[j-1] + ss[j]
-            ss = ss[:-1]
-        print(i)
-        for j in range(i):
-            print(ss[0].count(s[j]), end=" ")
-        print()
-        time.sleep(1)
+    print(Solution().largestVariance("ababab"))
+    print(Solution().largestVariance("abcde"))
+    print(Solution().largestVariance("abcdee"))
+    print(Solution().largestVariance("aababbb"))
+    print(Solution().largestVariance("aaaaabbba"))
