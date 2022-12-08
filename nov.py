@@ -1306,10 +1306,89 @@ class Solution:
             ans = max(ans, a_cnt - b_cnt if b_cnt > 0 else a_cnt - 1)
         return ans
 
+    # Problem No.2281 Sum of Total Strength of Wizards
+    # 
+    # As the ruler of a kingdom, you have an army of wizards at your command.
+    # 
+    # You are given a 0-indexed integer array strength, where strength[i] denotes the strength of the ith wizard. For a 
+    # contiguous group of wizards (i.e. the wizards' strengths form a subarray of strength), the total strength is 
+    # defined as the product of the following two values:
+    # 
+    # The strength of the weakest wizard in the group.
+    # The total of all the individual strengths of the wizards in the group.
+    # Return the sum of the total strengths of all contiguous groups of wizards. Since the answer may be very large, 
+    # return it modulo 10^9 + 7.
+    # 
+    # A subarray is a contiguous non-empty sequence of elements within an array.
+    # 
+    # Example 1:
+    #   Input: strength = [1,3,1,2]
+    #   Output: 44
+    #   Explanation: The following are all the contiguous groups of wizards:
+    #   - [1] from [1,3,1,2] has a total strength of min([1]) * sum([1]) = 1 * 1 = 1
+    #   - [3] from [1,3,1,2] has a total strength of min([3]) * sum([3]) = 3 * 3 = 9
+    #   - [1] from [1,3,1,2] has a total strength of min([1]) * sum([1]) = 1 * 1 = 1
+    #   - [2] from [1,3,1,2] has a total strength of min([2]) * sum([2]) = 2 * 2 = 4
+    #   - [1,3] from [1,3,1,2] has a total strength of min([1,3]) * sum([1,3]) = 1 * 4 = 4
+    #   - [3,1] from [1,3,1,2] has a total strength of min([3,1]) * sum([3,1]) = 1 * 4 = 4
+    #   - [1,2] from [1,3,1,2] has a total strength of min([1,2]) * sum([1,2]) = 1 * 3 = 3
+    #   - [1,3,1] from [1,3,1,2] has a total strength of min([1,3,1]) * sum([1,3,1]) = 1 * 5 = 5
+    #   - [3,1,2] from [1,3,1,2] has a total strength of min([3,1,2]) * sum([3,1,2]) = 1 * 6 = 6
+    #   - [1,3,1,2] from [1,3,1,2] has a total strength of min([1,3,1,2]) * sum([1,3,1,2]) = 1 * 7 = 7
+    #   The sum of all the total strengths is 1 + 9 + 1 + 4 + 4 + 4 + 3 + 5 + 6 + 7 = 44.
+    # 
+    # Example 2:
+    #   Input: strength = [5,4,6]
+    #   Output: 213
+    #   Explanation: The following are all the contiguous groups of wizards: 
+    #   - [5] from [5,4,6] has a total strength of min([5]) * sum([5]) = 5 * 5 = 25
+    #   - [4] from [5,4,6] has a total strength of min([4]) * sum([4]) = 4 * 4 = 16
+    #   - [6] from [5,4,6] has a total strength of min([6]) * sum([6]) = 6 * 6 = 36
+    #   - [5,4] from [5,4,6] has a total strength of min([5,4]) * sum([5,4]) = 4 * 9 = 36
+    #   - [4,6] from [5,4,6] has a total strength of min([4,6]) * sum([4,6]) = 4 * 10 = 40
+    #   - [5,4,6] from [5,4,6] has a total strength of min([5,4,6]) * sum([5,4,6]) = 4 * 15 = 60
+    #   The sum of all the total strengths is 25 + 16 + 36 + 36 + 40 + 60 = 213.
+    # 
+    # Constraints:
+    #   1 <= strength.length <= 10^5
+    #   1 <= strength[i] <= 10^9
+    def totalStrength(self, strength: List[int]) -> int:
+        s_sum_sum = 0
+        s_sum_sum_sb = [0] * (len(strength) + 2)
+        s_sum = [0] * (len(strength) + 1)
+        dp = [0]  * len(strength)
+        factor = [0] * len(strength)
+        stack = []
+        ans,s_sum_sum,MOD = 0,0,10**9 + 7
+
+        def sum_sum_func(k: int):
+            tmp = s_sum_sum - (s_sum[i] * k - s_sum_sum_sb[k-2])
+            return tmp
+
+        for i, stg in enumerate(strength):
+            s_sum[i] = s_sum[i - 1] + stg
+            s_sum_sum += stg * (i+1)
+            s_sum_sum_sb[i] = (s_sum_sum_sb[i-1] + s_sum[i]) % MOD
+            while len(stack) > 0 and stack[-1][1] >= stg:
+                last_i, _ = stack.pop()
+            if len(stack) == 0:
+                dp[i] = stg * sum_sum_func(0)
+            else: 
+                last_i = stack[-1][0]
+                dp[i] = (dp[last_i] + factor[last_i] * (s_sum[i] - s_sum[last_i]) + stg * sum_sum_func(last_i+1)) % MOD
+            ans = (ans + dp[i]) % MOD
+            if len(stack) == 0:
+                factor[i] = stg * (i+1)
+            else:
+                factor[i] = stg * (i - stack[-1][0]) + factor[stack[-1][0]]
+            stack.append((i, stg))
+        return ans
+        
+    
+            
+            
+
 
 if __name__ == '__main__':
-    print(Solution().largestVariance("ababab"))
-    print(Solution().largestVariance("abcde"))
-    print(Solution().largestVariance("abcdee"))
-    print(Solution().largestVariance("aababbb"))
-    print(Solution().largestVariance("aaaaabbba"))
+    print(Solution().totalStrength([5, 4, 6]))
+    print(Solution().totalStrength([1,3,1,2]))
